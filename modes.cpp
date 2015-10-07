@@ -54,48 +54,18 @@ static const uint8_t color_palette[32][3] = {
   {255, 0, 63},     // 0x1f
 };
 
-/*
-  // Red - green - 127 sat
-  {255, 127, 127},  // 0x20
-  {255, 159, 127},  // 0x21
-  {255, 191, 127},  // 0x22
-  {255, 223, 127},  // 0x23
-  {255, 255, 127},  // 0x24
-  {223, 255, 127},  // 0x25
-  {191, 255, 127},  // 0x26
-  {159, 255, 127},  // 0x27
-
-  // Green - blue - 127 sat
-  {127, 255, 127},  // 0x28
-  {127, 255, 159},  // 0x29
-  {127, 255, 191},  // 0x2a
-  {127, 255, 223},  // 0x2b
-  {127, 255, 255},  // 0x2c
-  {127, 223, 255},  // 0x2d
-  {127, 191, 255},  // 0x2e
-  {127, 159, 255},  // 0x2f
-
-  // Blue - green - 127 sat
-  {63,  63, 255},   // 0x30
-  {111, 63, 255},   // 0x31
-  {159, 63, 255},   // 0x32
-  {207, 63, 255},   // 0x33
-  {255, 63, 255},   // 0x34
-  {255, 63, 207},   // 0x35
-  {255, 63, 159},   // 0x36
-  {255, 63, 111}    // 0x37
-
-  // Super dims
-  {64, 64, 64},     // 0x38
-  {64, 0, 0},       // 0x39
-  {64, 64, 0},      // 0x3a
-  {0, 64, 0},       // 0x3b
-  {0, 64, 64},      // 0x3c
-  {0, 0, 64},       // 0x3d
-  {64, 0, 64},      // 0x3e
-  {0, 0, 0},        // 0x3f
-};
-*/
+void unpackHue(uint16_t hue, uint8_t *r, uint8_t *g, uint8_t *b) {
+  hue %= 1546;
+  uint8_t v = hue % 256;
+  switch (hue / 256) {
+    case 0: *r = 255;     *g = v;        *b = 0;       break;
+    case 1: *r = 255 - v; *g = 255;      *b = 0;       break;
+    case 2: *r = 0;       *g = 255;      *b = v;       break;
+    case 3: *r = 0;       *g = 255 - v;  *b = 255;     break;
+    case 4: *r = v;       *g = 0;        *b = 255;     break;
+    case 5: *r = 255;     *g = 0;        *b = 255 - v; break;
+  }
+}
 
 void unpackColor(uint8_t color, uint8_t *r, uint8_t *g, uint8_t *b) {
   uint8_t shade = color >> 6;
@@ -149,6 +119,25 @@ void TracerPrime::reset() {
   cur_color = 0;
   unpackColor(tracer_color, &tracer_r, &tracer_g, &tracer_b);
   unpackColor(palette[cur_color], &color_r, &color_g, &color_b);
+}
+
+
+void BlinkEPrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
+  if (tick >= total_time) {
+    tick = 0;
+  }
+  if (tick < (num_colors * color_time)) {
+    unpackColor(palette[tick % (num_colors * color_time)], &color_r, &color_g, &color_b);
+    *r = color_r; *g = color_g; *b = color_b;
+  } else {
+    *r = 0; *g = 0; *b = 0;
+  }
+  tick++;
+}
+
+void BlinkEPrime::reset() {
+  tick = 0;
+  total_time = (num_colors * color_time) + blank_time;
 }
 
 

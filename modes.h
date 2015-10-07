@@ -71,6 +71,42 @@ class TracerPrime : public Prime {
     uint8_t tracer_r, tracer_g, tracer_b;
 };
 
+class BlinkEPrime : public Prime {
+  public:
+    BlinkEPrime(uint16_t color_time, uint16_t blank_time) :
+      Prime(), color_time(color_time), blank_time(blank_time), total_time(0), num_colors(0) {}
+
+    void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b);
+    void reset();
+
+    uint16_t color_time, blank_time, total_time;
+    uint8_t palette[8];
+    uint8_t num_colors;
+};
+
+/*
+class RainbowPrime : public Prime {
+  public:
+    RainbowPrime(uint16_t color_time, uint16_t blank_time, uint16_t circle_time, uint8_t num_rainbows) :
+      Prime(), color_time(color_time), blank_time(blank_time), circle_time(circle_time), num_rainbows(num_rainbows) {}
+
+    void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b);
+    void reset();
+
+    uint16_t color_time, blank_time, circle_time;
+    uint8_t hue_n, hue_r, hue_offset;
+}
+
+class MorphPrime : public Prime {
+  public:
+    MorphPrime(uint16_t morph_time, uint16_t blank_time) :
+      Prime(), morph_time(morph_time), blank_time(blank_time) {}
+
+    void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b);
+    void reset();
+}
+*/
+
 
 // Modes are what we can switch between. Currently there are 2 modes,
 // SingleMode and DualMode. SingleMode uses one prime and doesn't use
