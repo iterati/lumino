@@ -29,7 +29,7 @@ class Prime {
     virtual void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b) {}
     virtual void reset() {}
 
-    uint32_t tick;
+    uint16_t tick;
     uint8_t color_r, color_g, color_b;
 };
 
@@ -84,34 +84,11 @@ class BlinkEPrime : public Prime {
     uint8_t num_colors;
 };
 
-/*
-class RainbowPrime : public Prime {
-  public:
-    RainbowPrime(uint16_t color_time, uint16_t blank_time, uint16_t circle_time, uint8_t num_rainbows) :
-      Prime(), color_time(color_time), blank_time(blank_time), circle_time(circle_time), num_rainbows(num_rainbows) {}
 
-    void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b);
-    void reset();
-
-    uint16_t color_time, blank_time, circle_time;
-    uint8_t hue_n, hue_r, hue_offset;
-}
-
-class MorphPrime : public Prime {
-  public:
-    MorphPrime(uint16_t morph_time, uint16_t blank_time) :
-      Prime(), morph_time(morph_time), blank_time(blank_time) {}
-
-    void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b);
-    void reset();
-}
-*/
-
-
-// Modes are what we can switch between. Currently there are 2 modes,
-// SingleMode and DualMode. SingleMode uses one prime and doesn't use
-// the accelerometer. DualMode uses two primes and switches between
-// the current variant based on the acc sensitivity
+// Modes are what we can switch between. Currently there are 2 modes, SingleMode
+// and DualMode. SingleMode uses one prime and doesn't use the accelerometer.
+// DualMode uses two primes and switches between the current variant based on
+// the acc sensitivity.
 class Mode {
   public:
     Mode() : tick(0), color_r(0), color_g(0), color_b(0), acc_x(0), acc_y(0), acc_z(0) {}
@@ -139,7 +116,7 @@ class SingleMode : public Mode {
 class DualMode : public Mode {
   // acc_mode: 0 - shake, 1 - tiltX, 2 - tiltY, 3 - tiltZ
   public:
-    DualMode(uint8_t acc_mode, uint16_t acc_sens) :
+    DualMode(uint8_t acc_mode, int16_t acc_sens) :
       Mode(), acc_mode(acc_mode), acc_sens(acc_sens), cur_variant(0) {}
 
     void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b);
@@ -147,10 +124,26 @@ class DualMode : public Mode {
     void updateAcc(uint8_t x, uint8_t y, uint8_t z);
 
     uint8_t acc_mode;
-    uint16_t acc_sens;
+    int16_t acc_sens;
     int16_t acc_counter;
     uint8_t cur_variant;
     Prime *prime[2];
+};
+
+class TiltedMode : public Mode {
+  public:
+    TiltedMode(uint8_t acc_axis, int16_t acc_sens) :
+      Mode(), acc_axis(acc_axis), acc_sens(acc_sens), cur_variant(1) {}
+
+    void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b);
+    void reset();
+    void updateAcc(uint8_t x, uint8_t y, uint8_t z);
+
+    uint8_t acc_axis;
+    int16_t acc_sens;
+    int16_t acc_counter;
+    uint8_t cur_variant;
+    Prime *prime[3];
 };
 
 #endif

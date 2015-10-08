@@ -27,31 +27,30 @@ StrobePrime prime10 = StrobePrime(11, 0);
 StrobePrime prime11 = StrobePrime(4, 7);
 
 // Mode2 -
-SingleMode mode2 = SingleMode();
+TiltedMode mode2 = TiltedMode(0, 200);
 StrobePrime prime20 = StrobePrime(5, 10);
+StrobePrime prime21 = StrobePrime(5, 10);
+StrobePrime prime22 = StrobePrime(5, 10);
 
 // Mode3 -
-DualMode mode3 = DualMode(A_SHAKE, 200);
-StrobePrime prime30 = StrobePrime(11, 0);
-StrobePrime prime31 = StrobePrime(4, 7);
+SingleMode mode3 = SingleMode();
+StrobePrime prime30 = StrobePrime(5, 10);
 
 // Mode4 -
 SingleMode mode4 = SingleMode();
 StrobePrime prime40 = StrobePrime(5, 10);
 
 // Mode5 -
-DualMode mode5 = DualMode(A_SHAKE, 200);
-StrobePrime prime50 = StrobePrime(11, 0);
-StrobePrime prime51 = StrobePrime(4, 7);
+SingleMode mode5 = SingleMode();
+StrobePrime prime50 = StrobePrime(5, 10);
 
 // Mode6 -
 SingleMode mode6 = SingleMode();
 StrobePrime prime60 = StrobePrime(5, 10);
 
 // Mode7 -
-DualMode mode7 = DualMode(A_SHAKE, 200);
-StrobePrime prime70 = StrobePrime(11, 0);
-StrobePrime prime71 = StrobePrime(4, 7);
+SingleMode mode7 = SingleMode();
+StrobePrime prime70 = StrobePrime(5, 10);
 
 
 uint8_t cur_mode = 0;
@@ -128,106 +127,57 @@ void setupModes() {
   // Mode2
   prime20.num_colors = 3;
   prime20.palette[0] = 0x08;
-  prime20.palette[1] = 0x10;
-  prime20.palette[2] = 0x18;
+  prime20.palette[1] = 0xd0;
+  prime20.palette[2] = 0xd8;
   prime20.reset();
-  mode2.prime = &prime20;
+  mode2.prime[0] = &prime20;
+  prime21.num_colors = 3;
+  prime21.palette[0] = 0xc8;
+  prime21.palette[1] = 0x10;
+  prime21.palette[2] = 0xd8;
+  prime21.reset();
+  mode2.prime[1] = &prime21;
+  prime22.num_colors = 3;
+  prime22.palette[0] = 0xc8;
+  prime22.palette[1] = 0xd0;
+  prime22.palette[2] = 0x18;
+  prime22.reset();
+  mode2.prime[2] = &prime22;
   mode2.reset();
 
   // Mode3
-  prime30.num_colors = 8;
-  prime30.palette[0] = 0x44;
-  prime30.palette[1] = 0xc8;
-  prime30.palette[2] = 0xcb;
-  prime30.palette[3] = 0xcf;
-  prime30.palette[4] = 0xd6;
-  prime30.palette[5] = 0xd6;
-  prime30.palette[6] = 0xd9;
-  prime30.palette[7] = 0xdd;
+  prime30.num_colors = 1;
+  prime30.palette[0] = 0x08;
   prime30.reset();
-  mode3.prime[0] = &prime30;
-
-  prime31.num_colors = 8;
-  prime31.palette[0] = 0x44;
-  prime31.palette[1] = 0x48;
-  prime31.palette[2] = 0x4b;
-  prime31.palette[3] = 0x4f;
-  prime31.palette[4] = 0x56;
-  prime31.palette[5] = 0x56;
-  prime31.palette[6] = 0x59;
-  prime31.palette[7] = 0x5d;
-  prime31.reset();
-  mode3.prime[1] = &prime31;
+  mode3.prime = &prime30;
   mode3.reset();
 
   // Mode4
-  prime40.num_colors = 3;
-  prime40.palette[0] = 0x08;
-  prime40.palette[1] = 0x10;
-  prime40.palette[2] = 0x18;
+  prime40.num_colors = 1;
+  prime40.palette[0] = 0x0b;
   prime40.reset();
   mode4.prime = &prime40;
   mode4.reset();
 
   // Mode5
-  prime50.num_colors = 8;
-  prime50.palette[0] = 0x44;
-  prime50.palette[1] = 0xc8;
-  prime50.palette[2] = 0xcb;
-  prime50.palette[3] = 0xcf;
-  prime50.palette[4] = 0xd6;
-  prime50.palette[5] = 0xd6;
-  prime50.palette[6] = 0xd9;
-  prime50.palette[7] = 0xdd;
+  prime50.num_colors = 1;
+  prime50.palette[0] = 0x0f;
   prime50.reset();
-  mode5.prime[0] = &prime50;
-
-  prime51.num_colors = 8;
-  prime51.palette[0] = 0x44;
-  prime51.palette[1] = 0x48;
-  prime51.palette[2] = 0x4b;
-  prime51.palette[3] = 0x4f;
-  prime51.palette[4] = 0x56;
-  prime51.palette[5] = 0x56;
-  prime51.palette[6] = 0x59;
-  prime51.palette[7] = 0x5d;
-  prime51.reset();
-  mode5.prime[1] = &prime51;
+  mode5.prime = &prime50;
   mode5.reset();
 
   // Mode6
-  prime60.num_colors = 3;
-  prime60.palette[0] = 0x08;
-  prime60.palette[1] = 0x10;
-  prime60.palette[2] = 0x18;
+  prime60.num_colors = 1;
+  prime60.palette[0] = 0x14;
   prime60.reset();
   mode6.prime = &prime60;
   mode6.reset();
 
   // Mode7
-  prime70.num_colors = 8;
-  prime70.palette[0] = 0x44;
-  prime70.palette[1] = 0xc8;
-  prime70.palette[2] = 0xcb;
-  prime70.palette[3] = 0xcf;
-  prime70.palette[4] = 0xd6;
-  prime70.palette[5] = 0xd6;
-  prime70.palette[6] = 0xd9;
-  prime70.palette[7] = 0xdd;
+  prime70.num_colors = 1;
+  prime70.palette[0] = 0x18;
   prime70.reset();
-  mode7.prime[0] = &prime70;
-
-  prime71.num_colors = 8;
-  prime71.palette[0] = 0x44;
-  prime71.palette[1] = 0x48;
-  prime71.palette[2] = 0x4b;
-  prime71.palette[3] = 0x4f;
-  prime71.palette[4] = 0x56;
-  prime71.palette[5] = 0x56;
-  prime71.palette[6] = 0x59;
-  prime71.palette[7] = 0x5d;
-  prime71.reset();
-  mode7.prime[1] = &prime71;
+  mode7.prime = &prime70;
   mode7.reset();
 }
 
@@ -303,7 +253,8 @@ void enterSleep() {
   analogWrite(PIN_B, 0);
 
   // Put accelerometer to sleep
-  MMA7660.MMA7660_I2C_SEND(0x07, 0x00);
+  /* MMA7660.MMA7660_I2C_SEND(0x07, 0x00); */
+  MMA7660.standby();
 
   // Disable volatage regulator
   digitalWrite(PIN_LDO, LOW);
@@ -324,9 +275,10 @@ void enterSleep() {
 #endif
 
   // Wake up. Power on LDO before trying to access the accelerometer
-  digitalWrite(PIN_LDO, HIGH);
-  MMA7660.MMA7660_I2C_SEND(0x07, 0x01);
   sleep_disable();
+  digitalWrite(PIN_LDO, HIGH);
+  MMA7660.init();
+  delay(4000);
   changeMode(0);
 }
 

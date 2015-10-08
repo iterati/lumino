@@ -177,15 +177,12 @@ void DualMode::reset() {
 void DualMode::updateAcc(uint8_t x, uint8_t y, uint8_t z) {
   // For this mode we only care about the absolute value of the acceleration.
   // Values come in 0-63 and get translated to -32-31 and then absed.
-  // Total acc is used for one part of shake calculation (maybe, it's an idea).
   acc_x = abs(MMA_ar[x]); acc_y = abs(MMA_ar[y]); acc_z = abs(MMA_ar[z]);
-  uint8_t total_acc = acc_x + acc_y + acc_z;
 
   switch (acc_mode) {
     case A_SHAKE:
-      if (acc_x > 24) acc_counter += acc_x - 24;
-      if (acc_y > 24) acc_counter += acc_y - 24;
-      if (acc_z > 24) acc_counter += acc_z - 24;
+      acc_x = max(max(acc_x, acc_y), acc_z);
+      if (acc_x > 24) acc_counter += acc_x;
       acc_counter -= 10;
       break;
     case A_TILTX:
@@ -216,10 +213,60 @@ void DualMode::updateAcc(uint8_t x, uint8_t y, uint8_t z) {
   // Cap at 0 and 2 * acc_counter
   if (acc_counter < 0) {
     acc_counter = 0;
-  } else if (acc_counter > acc_sens + acc_sens) {
-    acc_counter = acc_sens + acc_sens;
+  } else if (acc_counter > acc_sens << 1) {
+    acc_counter = acc_sens << 1;
   }
 
   // Use variant 1 is counter > sens
   cur_variant = (acc_counter > acc_sens) ? 1 : 0;
+}
+
+
+void TiltedMode::render(uint8_t *r, uint8_t *g, uint8_t *b) {
+  // Render using the cur_variant and increment the tick of the other anim to
+  // keep them in sync.
+  if (cur_variant == 0) {
+    prime[0]->render(&color_r, &color_g, &color_b);
+    prime[1]->tick++;
+    prime[2]->tick++;
+  } else if (cur_variant == 1) {
+    prime[0]->tick++;
+    prime[1]->render(&color_r, &color_g, &color_b);
+    prime[2]->tick++;
+  } else {
+    prime[0]->tick++;
+    prime[1]->tick++;
+    prime[2]->render(&color_r, &color_g, &color_b);
+  }
+  *r = color_r; *g = color_g; *b = color_b;
+}
+
+void TiltedMode::reset() {
+  tick = 0;
+  acc_counter = 0;
+  cur_variant = 1;
+  prime[0]->reset();
+  prime[1]->reset();
+  prime[2]->reset();
+}
+
+void TiltedMode::updateAcc(uint8_t x, uint8_t y, uint8_t z) {
+  // Values come in 0-63 and get translated to -32-31
+  int8_t acc;
+  if (acc_axis == 0) {
+    acc = MMA_ar[x];
+  } else if (acc_axis == 1) {
+    acc = MMA_ar[y];
+  } else {
+    acc = MMA_ar[z];
+  }
+
+  Serial.println(acc);
+  if (acc > 12) {
+    cur_variant = 1;
+  } else if (acc < -12) {
+    cur_variant = 2;
+  } else {
+    cur_variant = 0;
+  }
 }
