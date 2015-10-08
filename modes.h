@@ -21,6 +21,9 @@
  *
  * Tracer takes color_time, tracer_time, and tracer_color arguments. Requires
  * num_colors set to the highest palette idx to use.
+ *
+ * BlinkE takes color_time and blank_time. Each color is shown for color_time
+ * which is followed by blink_time.
  */
 class Prime {
   public:
@@ -28,6 +31,7 @@ class Prime {
 
     virtual void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b) {}
     virtual void reset() {}
+    virtual void incTick() {}
 
     uint16_t tick;
     uint8_t color_r, color_g, color_b;
@@ -47,6 +51,7 @@ class StrobePrime : public Prime {
 
     void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b);
     void reset();
+    void incTick();
 
     uint16_t color_time, blank_time, total_time;
     uint8_t palette[8];
@@ -62,6 +67,7 @@ class TracerPrime : public Prime {
 
     void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b);
     void reset();
+    void incTick();
 
     uint16_t color_time, tracer_time, total_time;
     uint8_t tracer_color;
@@ -78,6 +84,7 @@ class BlinkEPrime : public Prime {
 
     void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b);
     void reset();
+    void incTick();
 
     uint16_t color_time, blank_time, total_time;
     uint8_t palette[8];
@@ -129,6 +136,7 @@ class DualMode : public Mode {
     uint8_t cur_variant;
     Prime *prime[2];
 };
+
 
 class TiltedMode : public Mode {
   public:

@@ -76,19 +76,12 @@ void unpackColor(uint8_t color, uint8_t *r, uint8_t *g, uint8_t *b) {
 }
 
 void StrobePrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
-  if (tick >= total_time) {
-    tick = 0;
-    cur_color = (cur_color + 1) % num_colors;
-    unpackColor(palette[cur_color], &color_r, &color_g, &color_b);
-  }
-
   // Show a color and then blank
   if (tick < color_time) {
     *r = color_r; *g = color_g; *b = color_b;
   } else {
     *r = 0; *g = 0; *b = 0;
   }
-  tick++;
 }
 
 void StrobePrime::reset() {
@@ -97,21 +90,23 @@ void StrobePrime::reset() {
   unpackColor(palette[cur_color], &color_r, &color_g, &color_b);
 }
 
-
-void TracerPrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
+void StrobePrime::incTick() {
+  tick++;
   if (tick >= total_time) {
     tick = 0;
     cur_color = (cur_color + 1) % num_colors;
     unpackColor(palette[cur_color], &color_r, &color_g, &color_b);
   }
+}
 
+
+void TracerPrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   // Show a color and then the tracer color
   if (tick < color_time) {
     *r = color_r; *g = color_g; *b = color_b;
   } else {
     *r = tracer_r; *g = tracer_g; *b = tracer_b;
   }
-  tick++;
 }
 
 void TracerPrime::reset() {
@@ -121,23 +116,35 @@ void TracerPrime::reset() {
   unpackColor(palette[cur_color], &color_r, &color_g, &color_b);
 }
 
-
-void BlinkEPrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
+void TracerPrime::incTick() {
+  tick++;
   if (tick >= total_time) {
     tick = 0;
+    cur_color = (cur_color + 1) % num_colors;
+    unpackColor(palette[cur_color], &color_r, &color_g, &color_b);
   }
+}
+
+
+void BlinkEPrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   if (tick < (num_colors * color_time)) {
     unpackColor(palette[tick % (num_colors * color_time)], &color_r, &color_g, &color_b);
     *r = color_r; *g = color_g; *b = color_b;
   } else {
     *r = 0; *g = 0; *b = 0;
   }
-  tick++;
 }
 
 void BlinkEPrime::reset() {
   tick = 0;
   total_time = (num_colors * color_time) + blank_time;
+}
+
+void BlinkEPrime::incTick() {
+  tick++;
+  if (tick >= total_time) {
+    tick = 0;
+  }
 }
 
 
@@ -261,7 +268,6 @@ void TiltedMode::updateAcc(uint8_t x, uint8_t y, uint8_t z) {
     acc = MMA_ar[z];
   }
 
-  Serial.println(acc);
   if (acc > 12) {
     cur_variant = 1;
   } else if (acc < -12) {
