@@ -2,7 +2,7 @@
 #include "modes.h"
 
 // Taken from OSM_NEO
-int MMA_ar[64] = {
+int8_t MMA_ar[64] = {
   0,   1,     2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,
   16,  17,   18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,
   -32, -31, -30, -29, -28, -27, -26, -25, -24, -23, -22, -21, -20, -19, -18, -17,
@@ -55,7 +55,7 @@ static const uint8_t color_palette[32][3] = {
 };
 
 void unpackHue(uint16_t hue, uint8_t *r, uint8_t *g, uint8_t *b) {
-  hue %= 1546;
+  hue %= 1536;
   uint8_t v = hue % 256;
   switch (hue / 256) {
     case 0: *r = 255;     *g = v;        *b = 0;       break;
@@ -150,6 +150,7 @@ void BlinkEPrime::incTick() {
 
 void SingleMode::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   prime->render(&color_r, &color_g, &color_b);
+  prime->incTick();
   *r = color_r; *g = color_g; *b = color_b;
 }
 
@@ -164,13 +165,9 @@ void SingleMode::updateAcc(uint8_t x, uint8_t y, uint8_t z) {}
 void DualMode::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   // Render using the cur_variant and increment the tick of the other anim to
   // keep them in sync.
-  if (cur_variant == 0) {
-    prime[0]->render(r, g, b);
-    prime[1]->tick++;
-  } else {
-    prime[1]->render(r, g, b);
-    prime[0]->tick++;
-  }
+  prime[cur_variant]->render(r, g, b);
+  prime[0]->incTick();
+  prime[1]->incTick();
 }
 
 void DualMode::reset() {
@@ -232,19 +229,10 @@ void DualMode::updateAcc(uint8_t x, uint8_t y, uint8_t z) {
 void TiltedMode::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   // Render using the cur_variant and increment the tick of the other anim to
   // keep them in sync.
-  if (cur_variant == 0) {
-    prime[0]->render(&color_r, &color_g, &color_b);
-    prime[1]->tick++;
-    prime[2]->tick++;
-  } else if (cur_variant == 1) {
-    prime[0]->tick++;
-    prime[1]->render(&color_r, &color_g, &color_b);
-    prime[2]->tick++;
-  } else {
-    prime[0]->tick++;
-    prime[1]->tick++;
-    prime[2]->render(&color_r, &color_g, &color_b);
-  }
+  prime[cur_variant]->render(&color_r, &color_g, &color_b);
+  prime[0]->incTick();
+  prime[1]->incTick();
+  prime[2]->incTick();
   *r = color_r; *g = color_g; *b = color_b;
 }
 
@@ -275,4 +263,49 @@ void TiltedMode::updateAcc(uint8_t x, uint8_t y, uint8_t z) {
   } else {
     cur_variant = 0;
   }
+}
+
+
+void TiltMorph::render(uint8_t *r, uint8_t *g, uint8_t *b) {
+  if (tick > color_time) {
+    *r = color_r; *g = color_g; *b = color_b;
+  } else {
+    *r = 0; *g = 0; *b = 0;
+  }
+  tick++;
+}
+
+void TiltMorph::updateAcc(uint8_t x, uint8_t y, uint8_t z) {
+  float pitch, roll, xg, yg, zg, alpha;
+  alpha = 0.2;
+  xg = MMA_ar[x] / 20.0; yg = MMA_ar[y] / 20.0; zg = MMA_ar[z] / 20.0;
+
+  //Low Pass Filter
+  fxg = xg * alpha + (fxg * (1.0 - alpha));
+  fyg = yg * alpha + (fyg * (1.0 - alpha));
+  fzg = zg * alpha + (fzg * (1.0 - alpha));
+
+  //Roll & Pitch Equations
+  roll  = (atan2(-fyg, fzg) * 180.0) / M_PI;
+  pitch = (atan2(fxg, sqrt(fyg * fyg + fzg*fzg)) * 180.0) / M_PI;
+
+  hue = (roll + 180) * 4.267;
+  if (tick >= 40) {
+    color_time = (pitch + 80) / 4;
+    Serial.print(F("r: "));
+    Serial.print(roll);
+    Serial.print(F("\tp: "));
+    Serial.print(pitch);
+    Serial.print(F("\tcolor_time: "));
+    Serial.print(color_time);
+    Serial.println();
+    tick = 0;
+  }
+
+  unpackHue(hue, &color_r, &color_g, &color_b);
+}
+
+void TiltMorph::reset() {
+  tick = 0;
+  fxg = fyg = fzg = 0.0;
 }

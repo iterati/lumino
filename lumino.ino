@@ -17,24 +17,23 @@
 #define NUM_MODES 8
 
 // Declare modes here. Palettes go in setupModes()
-// Mode0 - RGB Strobe
-SingleMode mode0 = SingleMode();
-StrobePrime prime00 = StrobePrime(5, 10);
+// Mode0 - TiltMorph
+TiltMorph mode0 = TiltMorph();
 
-// Mode1 - dim rainbow trail strobes when shaken
-DualMode mode1 = DualMode(A_SHAKE, 200);
-StrobePrime prime10 = StrobePrime(11, 0);
-StrobePrime prime11 = StrobePrime(4, 7);
+// Mode1 - RGB Strobe
+SingleMode mode1 = SingleMode();
+StrobePrime prime10 = StrobePrime(5, 10);
 
-// Mode2 -
-TiltedMode mode2 = TiltedMode(0, 200);
-StrobePrime prime20 = StrobePrime(5, 10);
-StrobePrime prime21 = StrobePrime(5, 10);
-StrobePrime prime22 = StrobePrime(5, 10);
+// Mode2 - dim rainbow trail strobes when shaken
+DualMode mode2 = DualMode(A_SHAKE, 200);
+StrobePrime prime20 = StrobePrime(11, 0);
+StrobePrime prime21 = StrobePrime(4, 7);
 
 // Mode3 -
-SingleMode mode3 = SingleMode();
+TiltedMode mode3 = TiltedMode(0, 200);
 StrobePrime prime30 = StrobePrime(5, 10);
+StrobePrime prime31 = StrobePrime(5, 10);
+StrobePrime prime32 = StrobePrime(5, 10);
 
 // Mode4 -
 SingleMode mode4 = SingleMode();
@@ -56,7 +55,6 @@ StrobePrime prime70 = StrobePrime(5, 10);
 uint8_t cur_mode = 0;
 Mode *modes[NUM_MODES] = {&mode0, &mode1, &mode2, &mode3, &mode4, &mode5, &mode6, &mode7};
 Mode *mode = modes[cur_mode];
-
 
 // Gamma table ensures a smoother fade. Based on gamma=2
 static const uint8_t gamma_table[256] = {
@@ -83,100 +81,92 @@ uint8_t accel_counter = 10;     // Grab accel data every 10 ms
 
 uint8_t led_r, led_g, led_b;    // led channel value buffer
 int acc_x, acc_y, acc_z;        // accel values
+uint16_t hue;
+
+
+uint8_t print_counter, time_count = 0;
+float alpha = 0.1;
+float fxg, fyg, fzg = 0.0;
 
 uint8_t button_state;           // What state is the button in
 uint16_t since_press;           // How long since the button was pressed
 
 void setupModes() {
   // Set num_colors, mode primes, and prime palettes here
-  // Mode0
-  prime00.num_colors = 3;
-  prime00.palette[0] = 0x08;
-  prime00.palette[1] = 0x10;
-  prime00.palette[2] = 0x18;
-  prime00.reset();
-  mode0.prime = &prime00;
+  // Mode0 - no primes, no config!
   mode0.reset();
 
   // Mode1
-  prime10.num_colors = 8;
-  prime10.palette[0] = 0x44;
-  prime10.palette[1] = 0xc8;
-  prime10.palette[2] = 0xcb;
-  prime10.palette[3] = 0xcf;
-  prime10.palette[4] = 0xd6;
-  prime10.palette[5] = 0xd6;
-  prime10.palette[6] = 0xd9;
-  prime10.palette[7] = 0xdd;
-  prime10.reset();
-  mode1.prime[0] = &prime10;
-
-  prime11.num_colors = 8;
-  prime11.palette[0] = 0x44;
-  prime11.palette[1] = 0x48;
-  prime11.palette[2] = 0x4b;
-  prime11.palette[3] = 0x4f;
-  prime11.palette[4] = 0x56;
-  prime11.palette[5] = 0x56;
-  prime11.palette[6] = 0x59;
-  prime11.palette[7] = 0x5d;
-  prime11.reset();
-  mode1.prime[1] = &prime11;
+  prime10.num_colors = 3;
+  prime10.palette[0] = 0x08;
+  prime10.palette[1] = 0x10;
+  prime10.palette[2] = 0x18;
+  mode1.prime = &prime10;
   mode1.reset();
 
   // Mode2
-  prime20.num_colors = 3;
-  prime20.palette[0] = 0x08;
-  prime20.palette[1] = 0xd0;
-  prime20.palette[2] = 0xd8;
-  prime20.reset();
+  prime20.num_colors = 8;
+  prime20.palette[0] = 0x44;
+  prime20.palette[1] = 0xc8;
+  prime20.palette[2] = 0xcb;
+  prime20.palette[3] = 0xcf;
+  prime20.palette[4] = 0xd6;
+  prime20.palette[5] = 0xd6;
+  prime20.palette[6] = 0xd9;
+  prime20.palette[7] = 0xdd;
   mode2.prime[0] = &prime20;
-  prime21.num_colors = 3;
-  prime21.palette[0] = 0xc8;
-  prime21.palette[1] = 0x10;
-  prime21.palette[2] = 0xd8;
-  prime21.reset();
+
+  prime21.num_colors = 8;
+  prime21.palette[0] = 0x44;
+  prime21.palette[1] = 0x48;
+  prime21.palette[2] = 0x4b;
+  prime21.palette[3] = 0x4f;
+  prime21.palette[4] = 0x56;
+  prime21.palette[5] = 0x56;
+  prime21.palette[6] = 0x59;
+  prime21.palette[7] = 0x5d;
   mode2.prime[1] = &prime21;
-  prime22.num_colors = 3;
-  prime22.palette[0] = 0xc8;
-  prime22.palette[1] = 0xd0;
-  prime22.palette[2] = 0x18;
-  prime22.reset();
-  mode2.prime[2] = &prime22;
   mode2.reset();
 
   // Mode3
-  prime30.num_colors = 1;
+  prime30.num_colors = 3;
   prime30.palette[0] = 0x08;
-  prime30.reset();
-  mode3.prime = &prime30;
+  prime30.palette[1] = 0xd0;
+  prime30.palette[2] = 0xd8;
+  mode3.prime[0] = &prime30;
+  prime31.num_colors = 3;
+  prime31.palette[0] = 0xc8;
+  prime31.palette[1] = 0x10;
+  prime31.palette[2] = 0xd8;
+  mode3.prime[1] = &prime31;
+  prime32.num_colors = 3;
+  prime32.palette[0] = 0xc8;
+  prime32.palette[1] = 0xd0;
+  prime32.palette[2] = 0x18;
+  mode3.prime[2] = &prime32;
   mode3.reset();
 
   // Mode4
   prime40.num_colors = 1;
   prime40.palette[0] = 0x0b;
-  prime40.reset();
   mode4.prime = &prime40;
   mode4.reset();
 
   // Mode5
   prime50.num_colors = 1;
   prime50.palette[0] = 0x0f;
-  prime50.reset();
   mode5.prime = &prime50;
   mode5.reset();
 
   // Mode6
   prime60.num_colors = 1;
   prime60.palette[0] = 0x14;
-  prime60.reset();
   mode6.prime = &prime60;
   mode6.reset();
 
   // Mode7
   prime70.num_colors = 1;
   prime70.palette[0] = 0x18;
-  prime70.reset();
   mode7.prime = &prime70;
   mode7.reset();
 }
@@ -234,9 +224,9 @@ void loop() {
   limiter = 0;
 
   // Write out the gamma-corrected color to the LED
-  analogWrite(PIN_R, gamma_table[led_r]);
-  analogWrite(PIN_G, gamma_table[led_g]);
-  analogWrite(PIN_B, gamma_table[led_b]);
+  analogWrite(PIN_R, gamma_table[led_r >> 2]);
+  analogWrite(PIN_G, gamma_table[led_g >> 2]);
+  analogWrite(PIN_B, gamma_table[led_b >> 2]);
 }
 
 void enterSleep() {

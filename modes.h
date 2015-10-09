@@ -98,7 +98,7 @@ class BlinkEPrime : public Prime {
 // the acc sensitivity.
 class Mode {
   public:
-    Mode() : tick(0), color_r(0), color_g(0), color_b(0), acc_x(0), acc_y(0), acc_z(0) {}
+    Mode() : tick(0), color_r(0), color_g(0), color_b(0) {}
 
     virtual void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b) {}
     virtual void reset() {}
@@ -106,7 +106,6 @@ class Mode {
 
     uint32_t tick;
     uint8_t color_r, color_g, color_b;
-    uint8_t acc_x, acc_y, acc_z;
 };
 
 class SingleMode : public Mode {
@@ -135,6 +134,7 @@ class DualMode : public Mode {
     int16_t acc_counter;
     uint8_t cur_variant;
     Prime *prime[2];
+    uint8_t acc_x, acc_y, acc_z;
 };
 
 
@@ -152,6 +152,23 @@ class TiltedMode : public Mode {
     int16_t acc_counter;
     uint8_t cur_variant;
     Prime *prime[3];
+    uint8_t acc_x, acc_y, acc_z;
+};
+
+class TiltMorph : public Mode {
+  public:
+    TiltMorph():
+      Mode() {}
+
+    void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b);
+    void reset();
+    void updateAcc(uint8_t x, uint8_t y, uint8_t z);
+
+    uint16_t hue;
+    uint8_t color_time;
+    uint8_t strobe_ms;
+    uint8_t color_r, color_g, color_b;
+    float fxg, fyg, fzg, pitch, roll;
 };
 
 #endif
