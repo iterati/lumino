@@ -7,6 +7,7 @@ Current Features:
 * 5 Primes (Strobe, Tracer, Blink-E, Morph, and Fade) with 1 to 8 color palettes
 * 32 (31 + blank) Color palette with 4 shades per color
 * Conjuring mode
+* Bundles for storing different playback orders for modes
 
 
 # Installation

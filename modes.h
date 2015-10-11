@@ -168,6 +168,7 @@ class DualMode : public Mode {
     uint8_t cur_variant;
     int16_t acc_counter;
     Prime *prime[2];
+    float maxg;
 };
 
 
@@ -207,6 +208,7 @@ class Speeder : public Mode {
     uint8_t cur_variant;
     int16_t acc_counter;
     Prime *prime[3];
+    float maxg;
 };
 
 #endif

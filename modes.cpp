@@ -257,27 +257,27 @@ void DualMode::updateAcc(float fxg, float fyg, float fzg) {
 
   switch (acc_mode) {
     case A_SPEED:
+      maxg = (max(max(abs(fxg), abs(fyg)), abs(fzg)) * 0.05) + (maxg * 0.95);
       if (cur_variant == 0) {
-        if (abs(fxg) > 1.45 || abs(fyg) > 1.45 || abs(fzg) > 1.45) {
+        if (maxg > 1.45) {
           acc_counter++;
         } else {
           acc_counter--;
         }
         if (acc_counter < 0) acc_counter = 0;
-        if (acc_counter >= 50) {
+        if (acc_counter > 100) {
           cur_variant = 1;
-          acc_counter = 100;
         }
       } else {
-        if (abs(fxg) > 1.1 || abs(fyg) > 1.1 || abs(fzg) > 1.1) {
+        if (maxg > 1.1) {
           acc_counter++;
         } else {
           acc_counter--;
         }
         if (acc_counter <= 0) {
           cur_variant = 0;
-        } else if (acc_counter > 150) {
-          acc_counter = 150;
+        } else if (acc_counter > 200) {
+          acc_counter = 200;
         }
       }
       break;
@@ -422,28 +422,28 @@ void Speeder::render(uint8_t *r, uint8_t *g, uint8_t *b) {
 void Speeder::reset() {
   tick = 0;
   cur_variant = 0;
+  maxg = 0;
   prime[0]->reset();
   prime[1]->reset();
   prime[2]->reset();
 }
 
 void Speeder::updateAcc(float fxg, float fyg, float fzg) {
-  float pitch, maxg;
-  maxg = max(max(abs(fxg), abs(fyg)), abs(fzg));
-  if (maxg > 1.5) {
-    acc_counter += 8;
+  float pitch;
+  maxg = (max(max(abs(fxg), abs(fyg)), abs(fzg)) * 0.05) + (maxg * 0.95);
+  if (maxg > 1.55) {
+    acc_counter += 6;
   } else if (maxg > 1.3) {
     acc_counter += 4;
   } else if (maxg > 1.1) {
-    acc_counter--;
-  } else {
-    acc_counter -= 2;
-  }
+    acc_counter += 2;
+  } else
   if (acc_counter < 0) acc_counter = 0;
   if (cur_variant == 0) {
     if (acc_counter > 1000) {
       cur_variant = 1;
     }
+    acc_counter--;
   } else if (cur_variant == 1) {
     if (acc_counter < 500) {
       cur_variant = 0;
@@ -457,9 +457,6 @@ void Speeder::updateAcc(float fxg, float fyg, float fzg) {
     } else if (acc_counter > 4000) {
       acc_counter = 4000;
     }
-    acc_counter -= 4;
+    acc_counter -= 3;
   }
-  Serial.print(maxg);
-  Serial.print(F("\t"));
-  Serial.println(acc_counter);
 }
