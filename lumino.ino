@@ -27,7 +27,7 @@ TracerPrime prime11 = TracerPrime(3, 23, 0xd0); // Tilt hand up - green tracer
 TracerPrime prime12 = TracerPrime(3, 23, 0xd8); // Hand down - blue tracer
 
 // Mode2
-TriMode mode2 = TriMode(A_TILTY, 0.05);
+Speeder mode2 = Speeder(0.9);
 StrobePrime prime20 = StrobePrime(3, 23); // Hand flat
 StrobePrime prime21 = StrobePrime(3, 23); // Turn hand right
 StrobePrime prime22 = StrobePrime(3, 23); // Turn hand left
@@ -57,7 +57,7 @@ SingleMode mode7 = SingleMode();
 MorphPrime prime70 = MorphPrime(17, 17);
 
 int8_t bundles[NUM_BUNDLES][NUM_MODES] = {
-  {0, 1, 2, 3, 4, 5, 6, 7},
+  {2, 1, 2, 3, 4, 5, 6, 7},
   {3, 4, 5, -1, -1, -1, -1, -1},
   {0, 7, 0, 3, 0, 2, -1, -1},
   {3, -1, -1, -1, -1, -1, -1, -1},

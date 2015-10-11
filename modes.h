@@ -186,7 +186,7 @@ class TriMode : public Mode {
 
 class TiltMorph : public Mode {
   public:
-    TiltMorph(float alpha): Mode(alpha) {}
+    TiltMorph(float alpha) : Mode(alpha) {}
 
     void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b);
     void reset();
@@ -194,6 +194,19 @@ class TiltMorph : public Mode {
 
     uint16_t hue, hue_offset;
     uint8_t color_time;
+};
+
+class Speeder : public Mode {
+  public:
+    Speeder(float alpha) : Mode(alpha) {}
+
+    void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b);
+    void reset();
+    void updateAcc(float fxg, float fyg, float fzg);
+
+    uint8_t cur_variant;
+    int16_t acc_counter;
+    Prime *prime[3];
 };
 
 #endif

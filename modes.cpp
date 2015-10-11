@@ -406,3 +406,60 @@ void TiltMorph::reset() {
   tick = 0;
   hue_offset = 0;
 }
+
+
+void Speeder::render(uint8_t *r, uint8_t *g, uint8_t *b) {
+  // Render using the cur_variant and increment the tick of the other anim to
+  // keep them in sync.
+  uint8_t rr, gg, bb;
+  prime[cur_variant]->render(&rr, &gg, &bb);
+  *r = rr; *g = gg; *b = bb;
+  prime[0]->incTick();
+  prime[1]->incTick();
+  prime[2]->incTick();
+}
+
+void Speeder::reset() {
+  tick = 0;
+  cur_variant = 0;
+  prime[0]->reset();
+  prime[1]->reset();
+  prime[2]->reset();
+}
+
+void Speeder::updateAcc(float fxg, float fyg, float fzg) {
+  float pitch, maxg;
+  maxg = max(max(abs(fxg), abs(fyg)), abs(fzg));
+  if (maxg > 1.5) {
+    acc_counter += 8;
+  } else if (maxg > 1.3) {
+    acc_counter += 4;
+  } else if (maxg > 1.1) {
+    acc_counter--;
+  } else {
+    acc_counter -= 2;
+  }
+  if (acc_counter < 0) acc_counter = 0;
+  if (cur_variant == 0) {
+    if (acc_counter > 1000) {
+      cur_variant = 1;
+    }
+  } else if (cur_variant == 1) {
+    if (acc_counter < 500) {
+      cur_variant = 0;
+    } else if (acc_counter > 3000) {
+      cur_variant = 2;
+    }
+    acc_counter -= 2;
+  } else {
+    if (acc_counter < 2000) {
+      cur_variant = 1;
+    } else if (acc_counter > 4000) {
+      acc_counter = 4000;
+    }
+    acc_counter -= 4;
+  }
+  Serial.print(maxg);
+  Serial.print(F("\t"));
+  Serial.println(acc_counter);
+}
