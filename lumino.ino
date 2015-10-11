@@ -55,9 +55,15 @@ SingleMode mode7 = SingleMode();
 MorphPrime prime70 = MorphPrime(17, 17);
 
 
-uint8_t cur_mode = 0;
+int8_t bundles[2][NUM_MODES] = {
+  {0, 1, 2, 3, 4, 5, 6, 7},
+  {3, 4, 5, -1, -1, -1, -1, -1},
+};
+uint8_t cur_bundle = 0;
+uint8_t cur_bundle_idx = 0;
+
 Mode *modes[NUM_MODES] = {&mode0, &mode1, &mode2, &mode3, &mode4, &mode5, &mode6, &mode7};
-Mode *mode = modes[cur_mode];
+Mode *mode = modes[bundles[cur_bundle][cur_bundle_idx]];
 
 int8_t accel_ar[64] = {
     0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,
@@ -322,6 +328,7 @@ void loop() {
   // Get the color to be rendered
   uint8_t r, g, b;
   mode->render(&r, &g, &b);
+
   if (conjure && conjure_off) {
     writeFrame(0, 0, 0);
   } else {
@@ -353,8 +360,20 @@ void enterSleep() {
   sleep_mode();
 
   // Wait until button is releaed
-  while (digitalRead(PIN_BUTTON) == LOW) {}
+  uint16_t held_count = 0;
+  while (digitalRead(PIN_BUTTON) == LOW) {
+    if (limiter > 64000) {
+      limiter = 0;
+      held_count++;
+    }
+    if (held_count > 1500) {
+      flash(128, 0, 0, 5);
+    } else if (held_count > 2500) {
+      flash(0, 128, 0, 5);
+    }
+  }
 
+  Serial.println(held_count);
   Serial.println(F("Waking up now"));
 
   // Wake up. Power on LDO before trying to access the accelerometer
@@ -362,7 +381,11 @@ void enterSleep() {
   digitalWrite(PIN_LDO, HIGH);
   accInit();
   delay(4000);
-  changeMode(0);
+
+  if (held_count > 3000) {
+  }
+
+  resetMode();
   conjure = conjure_off = false;
 }
 
@@ -396,15 +419,13 @@ void handlePress(bool pressed) {
           }
           button_state = 0;
         } else {
-          cur_mode = (cur_mode + 1) % NUM_MODES;
-          Serial.print(F("changing to mode "));
-          Serial.println(cur_mode);
-          changeMode(cur_mode);
+          Serial.println(F("changing mode"));
+          incMode();
         }
         button_state = 0;
       } else if (since_press > 1000) {
         Serial.println(F("will sleep"));
-        flash(64, 64, 64);
+        flash(128, 128, 128, 5);
         button_state = 2;
       }
       break;
@@ -415,9 +436,9 @@ void handlePress(bool pressed) {
       if (!pressed) {
         enterSleep();
         button_state = 0;
-      } else if (since_press > 2200) {
+      } else if (since_press > 2500) {  // 500ms taken up during first flash
         Serial.println(F("will conjure"));
-        flash(0, 0, 64);
+        flash(0, 0, 64, 3);
         button_state = 3;
       }
       break;
@@ -438,17 +459,31 @@ void handlePress(bool pressed) {
   }
 }
 
-void changeMode(uint8_t idx) {
-  // Set current mode idx, point to mode, and then reset it
-  cur_mode = idx;
-  mode = modes[cur_mode];
+void resetMode() {
+  cur_bundle_idx = 0;
+  mode = modes[bundles[cur_bundle][cur_bundle_idx]];
   mode->reset();
   fxg = fyg = fzg = 0.0;
 }
 
-void flash(uint8_t r, uint8_t g, uint8_t b) {
-  for (uint8_t i = 0; i < 4; i++) {
-    for (uint8_t j = 0; j < 200; j++) {
+void incMode() {
+  int8_t new_idx;
+  cur_bundle_idx = (cur_bundle_idx + 1) % NUM_MODES;
+  new_idx = bundles[cur_bundle][cur_bundle_idx];
+
+  if (new_idx == -1) {
+    cur_bundle_idx = 0;
+    new_idx = bundles[cur_bundle][cur_bundle_idx];
+  }
+
+  mode = modes[new_idx];
+  mode->reset();
+  fxg = fyg = fzg = 0.0;
+}
+
+void flash(uint8_t r, uint8_t g, uint8_t b, uint8_t flashes) {
+  for (uint8_t i = 0; i < flashes; i++) {
+    for (uint8_t j = 0; j < 100; j++) {
       if (j < 100) {
         writeFrame(r, g, b);
       } else {
