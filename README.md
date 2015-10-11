@@ -1,18 +1,23 @@
 # Lumino
 
-Lumino is my attempt to make a framework for the Open-Source Microlight (OSMxyz)
-to allow for modes mimicing the Kinetic microlights.
+Lumino is an open and straightforward framework for the Open Source Microlight.
+The goal of this framework is to be flexible enough to allow for modes of
+differing structure. Live configuration of modes is not planned, so some
+familiarity with the code is required. The code is structured in such a way that
+configuration is simple enough for newbies and experienced developers alike.
 
-Future Goals:
-* More Primes for single and dual modes
-* More Modes that don't depend on Primes (accel-only based modes?)
+Current Features:
+* 4 Modes (SingleMode, DualMode, TriMode, and TiltMorph)
+* 4 Primes (Strobe, Tracer, Blink-E, and Morph) with 1 to 8 color palettes
+* 32 (31 + blank) Color palette with 4 shades per color
 * Conjuring mode
+
 
 # Configuration
 
 Currently all configuration must be done in code. You can configure the color
 palette and the modes you would like to use. The number of modes is entirely up
-to you and how much memory is available on the chip. 
+to you and how much memory is available on the chip.
 
 ## Palette Config
 
@@ -28,10 +33,13 @@ Each mode will have it's own configuration options. The best way to know what is
 configurable on a mode is to look at the header file ```modes.h```. Modes and
 their documentation are at the end of the file.  There are currently 3 modes:
 
-* Single - Uses a single prime with no accelerometer magic
-* Dual - Accelerometer is configured to switch between two primes
-* Tilted - Will chose between three primes when the axis is level, tiled along
-the negative axis, and tilted along the positive axis
+* SingleMode - Uses a single prime with no accelerometer magic.
+* DualMode - Can be configured to switch between primes based on speed or tilt
+along the X, Y, or Z axes.
+* Tilted - Can be configured to switch between three primes based on tilt along
+the X or Y axes.
+* TiltMorph - Hue slowly cycles along the color wheel. The light's roll alters
+the hue and the pitch changes the strobe timings.
 
 ## Prime Config
 
@@ -40,8 +48,9 @@ are defined and documented in ```modes.h```. Primes should be at the top of the
 file above the modes. There are currently 3 Primes:
 
 * Strobe - On/off through up to an 8 color palette
-* Tracer - Tracer/color through up to an 8 color palette (+ tracer color)
-* BlinkE - Color/color/color../blank through up to an 8 color palette
+* Tracer - Tracer/color through up to an 8 color palette (plus tracer color)
+* Blink-E - Color/color/color../blank through up to an 8 color palette
+* Morph - Color blends to next color/blank time through an up to 8 color palette
 
 ## Number of Modes
 
@@ -54,8 +63,22 @@ fit in memory. To do this, a number of things must happen in ```lumino.ino```:
 * You must add a pointer to the mode to the line beginning ```Mode *modes[NUM_MODES]```
 (use & in front of the variable name e.g. &mode13)
 
+## Turning the light off
 
-# Example configuration
+Hold the button in for 1s, until the light flashes white, and upon release, the
+light will turn off.
+
+## Conjuring Mode
+
+To enable conjuring mode, hold the button in for 3s until the light flashes
+blue. Upon release, conjuring mode will be enabled and the light will turn on
+and off with a single press. To reenable normal use, hold the button in for 3s
+again. Turning the light off in conjuring mode doesn't turn the light off, it
+just turns off the bulb. To turn off the light, hold it in for 1s until the
+light flashes white. Turning the light off will disble conjuring mode.
+
+
+# Example Configuration
 
 For this example we're going to make a Tilted mode where one of three colors
 will go missing depending on which prime we're in. We'll use mode3 for this. All

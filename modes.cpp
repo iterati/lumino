@@ -1,13 +1,4 @@
-#include <OSM_NEOv1-1-4.h>
 #include "modes.h"
-
-// Taken from OSM_NEO
-int8_t MMA_ar[64] = {
-  0,   1,     2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,
-  16,  17,   18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,
-  -32, -31, -30, -29, -28, -27, -26, -25, -24, -23, -22, -21, -20, -19, -18, -17,
-  -16, -15, -14, -13, -12, -11, -10,  -9,  -8,  -7,  -6,  -5,  -4,  -3,  -2,  -1
-};
 
 // idx from 00-1f, add 0x40 for each shading level
 // e.g. 0x88 for 2nd dimmest red
@@ -17,11 +8,11 @@ static const uint8_t color_palette[32][3] = {
   {0, 0, 0},        // 0x00
   {255, 255, 255},  // 0x01
   {255, 223, 223},  // 0x02
-  {223, 255, 223},  // 0x03
-  {223, 223, 255},  // 0x04
-  {255, 255, 223},  // 0x05
-  {255, 223, 255},  // 0x06
-  {223, 255, 255},  // 0x07
+  {255, 255, 223},  // 0x03
+  {223, 255, 223},  // 0x04
+  {223, 255, 255},  // 0x05
+  {223, 223, 255},  // 0x06
+  {255, 223, 255},  // 0x07
 
   // Red - green
   {255, 0, 0},      // 0x08
@@ -78,7 +69,9 @@ void unpackColor(uint8_t color, uint8_t *r, uint8_t *g, uint8_t *b) {
 void StrobePrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   // Show a color and then blank
   if (tick < color_time) {
-    *r = color_r; *g = color_g; *b = color_b;
+    uint8_t rr, gg, bb;
+    unpackColor(palette[cur_color], &rr, &gg, &bb);
+    *r = rr; *g = gg; *b = bb;
   } else {
     *r = 0; *g = 0; *b = 0;
   }
@@ -87,7 +80,6 @@ void StrobePrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
 void StrobePrime::reset() {
   tick = 0;
   cur_color = 0;
-  unpackColor(palette[cur_color], &color_r, &color_g, &color_b);
 }
 
 void StrobePrime::incTick() {
@@ -95,7 +87,6 @@ void StrobePrime::incTick() {
   if (tick >= total_time) {
     tick = 0;
     cur_color = (cur_color + 1) % num_colors;
-    unpackColor(palette[cur_color], &color_r, &color_g, &color_b);
   }
 }
 
@@ -103,17 +94,19 @@ void StrobePrime::incTick() {
 void TracerPrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   // Show a color and then the tracer color
   if (tick < color_time) {
-    *r = color_r; *g = color_g; *b = color_b;
+    uint8_t rr, gg, bb;
+    unpackColor(palette[cur_color], &rr, &gg, &bb);
+    *r = rr; *g = gg; *b = bb;
   } else {
-    *r = tracer_r; *g = tracer_g; *b = tracer_b;
+    uint8_t rr, gg, bb;
+    unpackColor(tracer_color, &rr, &gg, &bb);
+    *r = rr; *g = gg; *b = bb;
   }
 }
 
 void TracerPrime::reset() {
   tick = 0;
   cur_color = 0;
-  unpackColor(tracer_color, &tracer_r, &tracer_g, &tracer_b);
-  unpackColor(palette[cur_color], &color_r, &color_g, &color_b);
 }
 
 void TracerPrime::incTick() {
@@ -121,15 +114,15 @@ void TracerPrime::incTick() {
   if (tick >= total_time) {
     tick = 0;
     cur_color = (cur_color + 1) % num_colors;
-    unpackColor(palette[cur_color], &color_r, &color_g, &color_b);
   }
 }
 
 
 void BlinkEPrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   if (tick < (num_colors * color_time)) {
-    unpackColor(palette[tick % (num_colors * color_time)], &color_r, &color_g, &color_b);
-    *r = color_r; *g = color_g; *b = color_b;
+    uint8_t rr, gg, bb;
+    unpackColor(palette[(tick / color_time)], &rr, &gg, &bb);
+    *r = rr; *g = gg; *b = bb;
   } else {
     *r = 0; *g = 0; *b = 0;
   }
@@ -148,10 +141,44 @@ void BlinkEPrime::incTick() {
 }
 
 
+void MorphPrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
+  if (tick < color_time) {
+    uint8_t r0, g0, b0;
+    uint8_t r1, g1, b1;
+    float dr, dg, db;
+
+    unpackColor(palette[cur_color], &r0, &g0, &b0);
+    unpackColor(palette[(cur_color + 1) % num_colors], &r1, &g1, &b1);
+
+    dr = r0 + (tick * ((float)(r1 - r0) / (float)color_time));
+    dg = g0 + (tick * ((float)(g1 - g0) / (float)color_time));
+    db = b0 + (tick * ((float)(b1 - b0) / (float)color_time));
+
+    *r = dr; *g = dg; *b = db;
+  } else {
+    *r = 0; *g = 0; *b = 0;
+  }
+}
+
+void MorphPrime::reset() {
+  tick = 0;
+  cur_color = 0;
+}
+
+void MorphPrime::incTick() {
+  tick++;
+  if (tick >= total_time) {
+    tick = 0;
+    cur_color = (cur_color + 1) % num_colors;
+  }
+}
+
+
 void SingleMode::render(uint8_t *r, uint8_t *g, uint8_t *b) {
-  prime->render(&color_r, &color_g, &color_b);
+  uint8_t rr, gg, bb;
+  prime->render(&rr, &gg, &bb);
+  *r = rr; *g = gg; *b = bb;
   prime->incTick();
-  *r = color_r; *g = color_g; *b = color_b;
 }
 
 void SingleMode::reset() {
@@ -159,153 +186,175 @@ void SingleMode::reset() {
   prime->reset();
 }
 
-void SingleMode::updateAcc(uint8_t x, uint8_t y, uint8_t z) {}
+void SingleMode::updateAcc(float fxg, float fyg, float fzg) {}
 
 
 void DualMode::render(uint8_t *r, uint8_t *g, uint8_t *b) {
-  // Render using the cur_variant and increment the tick of the other anim to
-  // keep them in sync.
-  prime[cur_variant]->render(r, g, b);
+  uint8_t rr, gg, bb;
+  prime[cur_variant]->render(&rr, &gg, &bb);
+  *r = rr; *g = gg; *b = bb;
   prime[0]->incTick();
   prime[1]->incTick();
 }
 
 void DualMode::reset() {
   tick = 0;
-  acc_counter = 0;
   cur_variant = 0;
+  acc_counter = 0;
   prime[0]->reset();
   prime[1]->reset();
 }
 
-void DualMode::updateAcc(uint8_t x, uint8_t y, uint8_t z) {
-  // For this mode we only care about the absolute value of the acceleration.
-  // Values come in 0-63 and get translated to -32-31 and then absed.
-  acc_x = abs(MMA_ar[x]); acc_y = abs(MMA_ar[y]); acc_z = abs(MMA_ar[z]);
+void DualMode::updateAcc(float fxg, float fyg, float fzg) {
+  float pitch;
 
-  switch (acc_mode) {
-    case A_SHAKE:
-      acc_x = max(max(acc_x, acc_y), acc_z);
-      if (acc_x > 24) acc_counter += acc_x;
-      acc_counter -= 10;
-      break;
-    case A_TILTX:
-      if (acc_x > 18) {
-        acc_counter += acc_x - 18;
-      } else {
-        acc_counter -= 18 - acc_x;
-      }
-      break;
-    case A_TILTY:
-      if (acc_y > 18) {
-        acc_counter += acc_y - 18;
-      } else {
-        acc_counter -= 18 - acc_y;
-      }
-      break;
-    case A_TILTZ:
-      if (acc_z > 18) {
-        acc_counter += acc_z - 18;
-      } else {
-        acc_counter -= 18 - acc_z;
-      }
-      break;
-    default:
-      break;
+  if (cur_variant == 0) {
+    switch (acc_mode) {
+      case A_SHAKE:
+        if (abs(fxg) > 1.4 || abs(fyg) > 1.4 || abs(fzg) > 1.4) {
+          acc_counter += 5;
+        } else {
+          acc_counter--;
+        }
+        acc_counter = max(acc_counter, 0);
+        if (acc_counter >= 50) {
+          cur_variant = 1;
+          acc_counter += 20;
+        }
+        break;
+      case A_TILTX:
+        pitch = (atan2(fxg, sqrt(fyg * fyg + fzg * fzg)) * 180.0) / M_PI;
+        cur_variant = pitch < -75;
+        break;
+      case A_TILTY:
+        pitch = (atan2(fyg, sqrt(fxg * fxg + fzg * fzg)) * 180.0) / M_PI;
+        cur_variant = pitch < -75;
+        break;
+      default:
+        cur_variant = fzg < -0.9;
+        break;
+    }
+  } else {
+    switch (acc_mode) {
+      case A_SHAKE:
+        if (abs(fxg) > 1.35 || abs(fyg) > 1.35 || abs(fzg) > 1.35) {
+          acc_counter += 5;
+        } else {
+          acc_counter--;
+        }
+        if (acc_counter == 0) {
+          cur_variant = 0;
+        } else if (acc_counter > 100) {
+          acc_counter = 100;
+        }
+        break;
+      case A_TILTX:
+        pitch = (atan2(fxg, sqrt(fyg * fyg + fzg * fzg)) * 180.0) / M_PI;
+        cur_variant = pitch < 75;
+        break;
+      case A_TILTY:
+        pitch = (atan2(fyg, sqrt(fxg * fxg + fzg * fzg)) * 180.0) / M_PI;
+        cur_variant = pitch < 75;
+        break;
+      default:
+        cur_variant = fzg < 0.9;
+    }
   }
-
-  // Cap at 0 and 2 * acc_counter
-  if (acc_counter < 0) {
-    acc_counter = 0;
-  } else if (acc_counter > acc_sens << 1) {
-    acc_counter = acc_sens << 1;
-  }
-
-  // Use variant 1 is counter > sens
-  cur_variant = (acc_counter > acc_sens) ? 1 : 0;
 }
 
 
-void TiltedMode::render(uint8_t *r, uint8_t *g, uint8_t *b) {
+void TriMode::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   // Render using the cur_variant and increment the tick of the other anim to
   // keep them in sync.
-  prime[cur_variant]->render(&color_r, &color_g, &color_b);
+  uint8_t rr, gg, bb;
+  prime[cur_variant]->render(&rr, &gg, &bb);
+  *r = rr; *g = gg; *b = bb;
   prime[0]->incTick();
   prime[1]->incTick();
   prime[2]->incTick();
-  *r = color_r; *g = color_g; *b = color_b;
 }
 
-void TiltedMode::reset() {
+void TriMode::reset() {
   tick = 0;
-  acc_counter = 0;
-  cur_variant = 1;
+  cur_variant = 0;
   prime[0]->reset();
   prime[1]->reset();
   prime[2]->reset();
 }
 
-void TiltedMode::updateAcc(uint8_t x, uint8_t y, uint8_t z) {
+void TriMode::updateAcc(float fxg, float fyg, float fzg) {
   // Values come in 0-63 and get translated to -32-31
-  int8_t acc;
-  if (acc_axis == 0) {
-    acc = MMA_ar[x];
-  } else if (acc_axis == 1) {
-    acc = MMA_ar[y];
+  float pitch;
+
+  if (tilt_axis == A_TILTX) {
+    pitch = (atan2(fxg, sqrt(fyg * fyg + fzg * fzg)) * 180.0) / M_PI;
   } else {
-    acc = MMA_ar[z];
+    pitch = (atan2(fyg, sqrt(fxg * fxg + fzg * fzg)) * 180.0) / M_PI;
   }
 
-  if (acc > 12) {
-    cur_variant = 1;
-  } else if (acc < -12) {
-    cur_variant = 2;
-  } else {
-    cur_variant = 0;
+  switch (cur_variant) {
+    case 0:
+      if (pitch < -75) {
+        cur_variant = 1;
+      } else if (pitch > 75) {
+        cur_variant = 2;
+      }
+      break;
+    case 1:
+      if (pitch > 15) {
+        cur_variant = 0;
+      }
+      break;
+    default:
+      if (pitch < -15) {
+        cur_variant = 0;
+      }
+      break;
   }
 }
 
 
 void TiltMorph::render(uint8_t *r, uint8_t *g, uint8_t *b) {
-  if (tick > color_time) {
-    *r = color_r; *g = color_g; *b = color_b;
+  if (tick < color_time) {
+    uint8_t rr, gg, bb;
+    unpackHue(hue + hue_offset, &rr, &gg, &bb);
+    *r = rr; *g = gg; *b = bb;
   } else {
     *r = 0; *g = 0; *b = 0;
   }
   tick++;
 }
 
-void TiltMorph::updateAcc(uint8_t x, uint8_t y, uint8_t z) {
-  float pitch, roll, xg, yg, zg, alpha;
-  alpha = 0.2;
-  xg = MMA_ar[x] / 20.0; yg = MMA_ar[y] / 20.0; zg = MMA_ar[z] / 20.0;
-
-  //Low Pass Filter
-  fxg = xg * alpha + (fxg * (1.0 - alpha));
-  fyg = yg * alpha + (fyg * (1.0 - alpha));
-  fzg = zg * alpha + (fzg * (1.0 - alpha));
+void TiltMorph::updateAcc(float fxg, float fyg, float fzg) {
+  float pitch, roll;
 
   //Roll & Pitch Equations
   roll  = (atan2(-fyg, fzg) * 180.0) / M_PI;
-  pitch = (atan2(fxg, sqrt(fyg * fyg + fzg*fzg)) * 180.0) / M_PI;
+  pitch = ((atan2(fxg, sqrt(fyg * fyg + fzg * fzg)) * 180.0) / M_PI) + 90;
 
   hue = (roll + 180) * 4.267;
-  if (tick >= 40) {
-    color_time = (pitch + 80) / 4;
-    Serial.print(F("r: "));
-    Serial.print(roll);
-    Serial.print(F("\tp: "));
-    Serial.print(pitch);
-    Serial.print(F("\tcolor_time: "));
-    Serial.print(color_time);
-    Serial.println();
+  if (tick >= 60) {
+    if (pitch < 15) {
+      color_time = 60;
+    } else if (pitch < 45) {
+      color_time = 50;
+    } else if (pitch < 75) {
+      color_time = 40;
+    } else if (pitch < 105) {
+      color_time = 30;
+    } else if (pitch < 135) {
+      color_time = 20;
+    } else if (pitch < 165) {
+      color_time = 10;
+    } else {
+      color_time = 0;
+    }
+    hue_offset++;
     tick = 0;
   }
-
-  unpackHue(hue, &color_r, &color_g, &color_b);
 }
 
 void TiltMorph::reset() {
   tick = 0;
-  fxg = fyg = fzg = 0.0;
+  hue_offset = 0;
 }

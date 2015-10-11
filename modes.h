@@ -8,6 +8,9 @@
 #define A_TILTY 2
 #define A_TILTZ 3
 
+void unpackHue(uint16_t hue, uint8_t *r, uint8_t *g, uint8_t *b);
+void unpackColor(uint8_t color, uint8_t *r, uint8_t *g, uint8_t *b);
+
 /* Primes are used for the current two modes to define the animation. There are
  * currently 2 primes: strobe and tracer.
  *
@@ -74,7 +77,6 @@ class TracerPrime : public Prime {
     uint8_t palette[8];
     uint8_t num_colors;
     uint8_t cur_color;
-    uint8_t tracer_r, tracer_g, tracer_b;
 };
 
 class BlinkEPrime : public Prime {
@@ -91,6 +93,22 @@ class BlinkEPrime : public Prime {
     uint8_t num_colors;
 };
 
+class MorphPrime : public Prime {
+  public:
+    MorphPrime(uint16_t color_time, uint16_t blank_time) :
+      Prime(), color_time(color_time), blank_time(blank_time),
+      total_time(color_time + blank_time), num_colors(0) {}
+
+    void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b);
+    void reset();
+    void incTick();
+
+    uint16_t color_time, blank_time, total_time;
+    uint8_t palette[8];
+    uint8_t num_colors;
+    uint8_t cur_color;
+};
+
 
 // Modes are what we can switch between. Currently there are 2 modes, SingleMode
 // and DualMode. SingleMode uses one prime and doesn't use the accelerometer.
@@ -98,77 +116,67 @@ class BlinkEPrime : public Prime {
 // the acc sensitivity.
 class Mode {
   public:
-    Mode() : tick(0), color_r(0), color_g(0), color_b(0) {}
+    Mode(float alpha) : alpha(alpha), tick(0), color_r(0), color_g(0), color_b(0) {}
 
     virtual void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b) {}
     virtual void reset() {}
-    virtual void updateAcc(uint8_t x, uint8_t y, uint8_t z) {}
+    virtual void updateAcc(float fxg, float fyg, float fzg);
 
+    float alpha;
     uint32_t tick;
     uint8_t color_r, color_g, color_b;
 };
 
 class SingleMode : public Mode {
   public:
-    SingleMode() {}
+    SingleMode() : Mode(0) {}
 
     void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b);
     void reset();
-    void updateAcc(uint8_t x, uint8_t y, uint8_t z);
+    void updateAcc(float fxg, float fyg, float fzg);
 
     Prime *prime;
 };
 
 class DualMode : public Mode {
-  // acc_mode: 0 - shake, 1 - tiltX, 2 - tiltY, 3 - tiltZ
+  // acc_mode: 0 - tiltX, 1 - tiltY, 2 - tiltZ, 3 - shake
   public:
-    DualMode(uint8_t acc_mode, int16_t acc_sens) :
-      Mode(), acc_mode(acc_mode), acc_sens(acc_sens), cur_variant(0) {}
+    DualMode(uint8_t acc_mode, float alpha) : Mode(alpha), acc_mode(acc_mode), cur_variant(0) {}
 
     void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b);
     void reset();
-    void updateAcc(uint8_t x, uint8_t y, uint8_t z);
+    void updateAcc(float fxg, float fyg, float fzg);
 
     uint8_t acc_mode;
-    int16_t acc_sens;
-    int16_t acc_counter;
     uint8_t cur_variant;
+    int8_t acc_counter;
     Prime *prime[2];
-    uint8_t acc_x, acc_y, acc_z;
 };
 
 
-class TiltedMode : public Mode {
+class TriMode : public Mode {
   public:
-    TiltedMode(uint8_t acc_axis, int16_t acc_sens) :
-      Mode(), acc_axis(acc_axis), acc_sens(acc_sens), cur_variant(1) {}
+    TriMode(uint8_t tilt_axis, float alpha) : Mode(alpha), tilt_axis(tilt_axis) {}
 
     void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b);
     void reset();
-    void updateAcc(uint8_t x, uint8_t y, uint8_t z);
+    void updateAcc(float fxg, float fyg, float fzg);
 
-    uint8_t acc_axis;
-    int16_t acc_sens;
-    int16_t acc_counter;
+    uint8_t tilt_axis;
     uint8_t cur_variant;
     Prime *prime[3];
-    uint8_t acc_x, acc_y, acc_z;
 };
 
 class TiltMorph : public Mode {
   public:
-    TiltMorph():
-      Mode() {}
+    TiltMorph(float alpha): Mode(alpha) {}
 
     void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b);
     void reset();
-    void updateAcc(uint8_t x, uint8_t y, uint8_t z);
+    void updateAcc(float fxg, float fyg, float fzg);
 
-    uint16_t hue;
+    uint16_t hue, hue_offset;
     uint8_t color_time;
-    uint8_t strobe_ms;
-    uint8_t color_r, color_g, color_b;
-    float fxg, fyg, fzg, pitch, roll;
 };
 
 #endif
