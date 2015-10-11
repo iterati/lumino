@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-#define A_SHAKE 0
+#define A_SPEED 0
 #define A_TILTX 1
 #define A_TILTY 2
 #define A_TILTZ 3

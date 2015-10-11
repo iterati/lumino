@@ -67,51 +67,9 @@ Each mode will have it's own configuration options. The best way to know what is
 * Tilted - Can be configured to switch between three primes based on tilt along the X or Y axes.
 * TiltMorph - Hue slowly cycles along the color wheel. The light's roll alters the hue and the pitch changes the strobe timings.
 
-### SingleMode()
+## Primes
 
-Does not take any arguments, just requires a prime.
-
-**Must be set in setupModes()**
-* ```prime``` - Must be set to a Prime
-* ```reset()``` - Sets up the mode
-
-### DualMode(trigger type, sensitivity)
-
-* Trigger type - What type of accelerometer action kicks off the change?
-  * A_SHAKE - Moving too quickly changes variant. Recommended sensitivity is 0.5 or greater for quick changes and less for slow changes.
-  * A_TILTX - Starts with the down variant and changes when your fingers point up. Changes back when you point your fingers down. Recommended sensitivity is 0.05 or lower.
-  * A_TILTY - Starts with the left variant and changes when your hand tilts to the right. Changes back when your hand points to the left. Recommended sensitivity is 0.05 or lower.
-  * A_TILTZ - Starts with the button up variant and changes when the button points down. Changes back when the button points up. Recommended sensitivity is 0.05 or lower.
-* Sensitivity - The lower the less sensitive to change the accelerometer is.
-
-**Must be set in setupModes()**
-* ```prime[0]``` - Must be set to a Prime
-* ```prime[1]``` - Must be set to a Prime
-* ```reset()``` - Sets up the mode
-
-### TriMode(axis, sensitivity)
-
-* Trigger type - Either A_TILTX or A_TILTY. Changes when pointing up or down (left or right) and back when above or below flat again.
-* Sensitivity - Recommended 0.05 or lower.
-
-**Must be set in setupModes()**
-* ```prime[0]``` - Must be set to a Prime
-* ```prime[1]``` - Must be set to a Prime
-* ```prime[2]``` - Must be set to a Prime
-* ```reset()``` - Sets up the mode
-
-### TiltMorph(sensitivity)
-
-* Sensitivity - mostly used for smoothing transitions. Recommended 0.05.
-
-**Must be set in setupModes()**
-* ```reset()``` - Sets up the mode
-
-## Prime Config
-
-Some modes will use animation primes as a base for the mode. Primes, like Modes,
-are defined and documented in ```modes.h```. Primes should be at the top of the
-file above the modes. There are currently 3 Primes:
+Some modes will use animation primes as a base for the mode. Primes, like Modes, are defined and documented in ```modes.h```. Primes should be at the top of the file above the modes. There are currently 3 Primes:
 
 * Strobe - On/off through up to an 8 color palette
 * Tracer - Tracer/color through up to an 8 color palette (plus tracer color)
@@ -123,42 +81,153 @@ file above the modes. There are currently 3 Primes:
 * Color time - ms color is shown before blank and switching to next color
 * Blank time - ms blank is shown
 
-**Must be set in setupModes()**
-* ```num_colors``` - Number of colors in your palette. 1 to 8.
-* ```palette[#]``` - # (0-7) color in the palette (index starts at 0, fo first color is 0, third is 2, etc)
-
 ### TracerPrime(color time, tracer time, tracer color)
 
 * Color time - ms color is shown before tracer and switching to next color
 * Tracer time - ms tracer is shown
 * Tracer color - Tracer color value. A dim color is recommended.
 
-**Must be set in setupModes()**
-* ```num_colors``` - Number of colors in your palette. 1 to 8.
-* ```palette[#]``` - # (0-7) color in the palette
-
 ### BlinkEPrime(color time, blank time)
 
 * Color time - ms color is shown before changing
 * Blank time - ms blank is shown
-
-**Must be set in setupModes()**
-* ```num_colors``` - Number of colors in your palette. 1 to 8.
-* ```palette[#]``` - # (0-7) color in the palette
 
 ### MorphPrime(color time, blank time)
 
 * Color time - ms color is shown and blended before changing
 * Blank time - ms blank is shown
 
-**Must be set in setupModes()**
-* ```num_colors``` - Number of colors in your palette. 1 to 8.
-* ```palette[#]``` - # (0-7) color in the palette
+## Examples
+
+### SingleMode()
+
+```
+// DECLARE MODES HERE. Palettes go in setupModes()
+SingleMode mode0 = SingleMode();          // Create a single mode called mode0.
+StrobePrime prime00 = StrobePrime(2, 10); // Create DOPS-like prime called prime00.
+
+<snip>
+
+// SETUP MODES HERE
+void setupModes() {
+    prime00.num_colors = 3;           // We're going to use 3 colors.
+                                      // Always set this first.
+    prime00.palette[0] = 0x16;        // Look up colors in modes.cpp.
+                                      // 0x16 is blue with a little green in it.
+    prime00.palette[1] = 0x1f + 0x80; // 0x1f is red with a hint of blue.
+                                      // + 0x80 dims the shade 2 levels.
+    prime00.palette[2] = 0x00;        // 0x00 (and 0x40, 0x80, 0xc0) indicates blank.
+    mode0.prime = &prime00;           // Point mode0.prime to prime00.
+    mode0.reset();                    // Last step after setting up mode.
+
+    <snip>
+```
+
+### DualMode(trigger type, sensitivity)
+
+* Trigger type - What type of accelerometer action kicks off the change?
+  * A_SPEED - Moving too quickly changes variant. Recommended sensitivity is 0.5 or greater for quick changes and less for slow changes.
+  * A_TILTX - Starts with the down variant and changes when your fingers point up. Changes back when you point your fingers down. Recommended sensitivity is 0.05 or lower.
+  * A_TILTY - Starts with the left variant and changes when your hand tilts to the right. Changes back when your hand points to the left. Recommended sensitivity is 0.05 or lower.
+  * A_TILTZ - Starts with the button up variant and changes when the button points down. Changes back when the button points up. Recommended sensitivity is 0.05 or lower.
+* Sensitivity - The lower the less sensitive to change the accelerometer is.
+
+```
+// DECLARE MODES HERE. Palettes go in setupModes()
+DualMode mode0 = DualMode(A_SPEED, 0.9);  // Create a speed dual mode called mode0.
+                                          // 0.9 is a high sensitivity setting.
+BlinkEPrime prime00 = BlinkEPrime(3, 23); // Create a blink-e prime called prime00.
+                                          // This is your slow variant.
+MorphPrime prime01 = MorphPrime(17, 17);  // Create a morph hyperstrobe called prime01.
+                                          // This is your fast variant.
+
+<snip>
+
+// SETUP MODES HERE
+void setupModes() {
+    prime00.num_colors = 3;           // We're going to use 3 colors.
+                                      // Always set this first.
+                                      // Look up colors in modes.cpp.
+    prime00.palette[0] = 0x16;        // 0x16 is blue with a little green in it.
+    prime00.palette[1] = 0x1a;        // 0x1a is purple.
+    prime00.palette[2] = 0x11;        // 0x11 is green with some blue.
+
+    prime01.num_colors = 3;           // We're just going to reuse the same palette.
+    prime01.palette[0] = 0x16;
+    prime01.palette[1] = 0x1a;
+    prime01.palette[2] = 0x11;
+
+    mode0.prime[0] = &prime00;        // Point mode0.prime[0] to prime00.
+    mode0.prime[1] = &prime01;        // Point mode0.prime[1] to prime01.
+    mode0.reset();                    // Last step after setting up mode.
+
+    <snip>
+```
+
+### TriMode(axis, sensitivity)
+
+* Trigger type - Either A_TILTX or A_TILTY. Changes when pointing up or down (left or right) and back when above or below flat again.
+* Sensitivity - Recommended 0.05 or lower.
+
+```
+// DECLARE MODES HERE. Palettes go in setupModes()
+TriMode mode0 = TriMode(A_TILTX, 0.05);         // Create a TriMode using the X axis for switching.
+                                                // 0.05 is a low sensitivity setting.
+TracerPrime prime00 = TracerPrime(3, 23, 0xc8); // Create a tracer prime called prime00.
+                                                // 0xc8 is the dimmest red setting.
+                                                // This is your middle variant.
+TracerPrime prime00 = TracerPrime(3, 23, 0xd0); // Create a tracer prime called prime01.
+                                                // 0xd0 is the dimmest green setting.
+                                                // This is your up variant.
+TracerPrime prime00 = TracerPrime(3, 23, 0xd8); // Create a tracer prime called prime02.
+                                                // 0xd8 is the dimmest blue setting.
+                                                // This is your down variant.
+<snip>
+
+// SETUP MODES HERE
+void setupModes() {
+    prime00.num_colors = 2;           // We're going to use 2 colors.
+                                      // Always set this first.
+                                      // Look up colors in modes.cpp.
+    prime00.palette[0] = 0x10;        // 0x10 is green.
+    prime00.palette[1] = 0x18;        // 0x18 is blue.
+
+    prime01.num_colors = 2;
+    prime01.palette[0] = 0x08;        // 0x08 is red.
+    prime01.palette[1] = 0x18;
+
+    prime02.num_colors = 2;
+    prime02.palette[0] = 0x08;        // 0x08 is red.
+    prime02.palette[1] = 0x10;
+
+    mode0.prime[0] = &prime00;        // Point mode0.prime[0] to prime00.
+    mode0.prime[1] = &prime01;        // Point mode0.prime[1] to prime01.
+    mode0.prime[2] = &prime02;        // Point mode0.prime[2] to prime02.
+    mode0.reset();                    // Last step after setting up mode.
+
+    <snip>
+```
+
+### TiltMorph(sensitivity)
+
+* Sensitivity - mostly used for smoothing transitions. Recommended 0.05.
+
+```
+// DECLARE MODES HERE. Palettes go in setupModes()
+TiltMorph mode0 = TiltMorph();  // Create a tiltmorph mode named mode0
+
+<snip>
+
+// SETUP MODES HERE
+void setupModes() {
+    mode0.reset();  // Be sure to reset even the TiltMorph mode.
+
+    <snip>
+```
 
 ## Number of Modes
 
-The number of modes can be changed to any number only limited by what modes will
-fit in memory. To do this, a number of things must happen in ```lumino.ino```:
+The number of modes can be changed to any number only limited by what modes will fit in memory. To do this, a number of things must happen in ```lumino.ino```:
 
 * The line ```#define NUM_MODES``` must be set
 * You must declare each mode (and it's primes) as shown
@@ -166,6 +235,23 @@ fit in memory. To do this, a number of things must happen in ```lumino.ino```:
 * You must add a pointer to the mode to the line beginning ```Mode *modes[NUM_MODES]```
 (use & in front of the variable name e.g. &mode13)
 
+## Bundles
+
+The number of bundles are defined in the line ```#define NUM_BUNDLES```. You must have that number of bundles defined in the bundles array.
+
+### Example Bundle Config
+
+```
+#define NUM_MODES 8
+#define NUM_BUNDLES 4
+
+int bundles[NUM_BUNDLES][NUM_MODES] = {
+  {0, 1, 2, 3, 4, 5, 6, 7},         // Bundle with all modes in order
+  {3, 4, 5, -1, -1, -1, -1, -1},    // Bundle with only modes 3, 4, and 5
+  {0, 7, 0, 3, 0, 2, -1, -1},       // Mode 0 every other mode and modes 7, 3, and 2
+  {3, -1, -1, -1, -1, -1, -1, -1},  // Only mode 3. No mode switching.
+};
+```
 
 # Reverting to NEO
 

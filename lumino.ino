@@ -12,9 +12,11 @@
 #define PIN_LDO A3
 #define MMA7660_ADDRESS 0x4C
 
+#define NUM_BUNDLES 4
 #define NUM_MODES 8
 
-// Declare modes here. Palettes go in setupModes()
+// DECLARE MODES HERE. Palettes go in setupModes()
+
 // Mode0
 TiltMorph mode0 = TiltMorph(0.05);
 
@@ -31,7 +33,7 @@ TracerPrime prime21 = TracerPrime(3, 23, 0xd0); // Turn hand right - green trace
 TracerPrime prime22 = TracerPrime(3, 23, 0xd8); // Turn hand left - blue tracer
 
 // Mode3
-DualMode mode3 = DualMode(A_SHAKE, 0.75);
+DualMode mode3 = DualMode(A_SPEED, 0.75);
 BlinkEPrime prime30 = BlinkEPrime(5, 30); // Slow
 StrobePrime prime31 = StrobePrime(3, 23); // Fast
 
@@ -54,10 +56,11 @@ StrobePrime prime61 = StrobePrime(3, 23); // Button down
 SingleMode mode7 = SingleMode();
 MorphPrime prime70 = MorphPrime(17, 17);
 
-
-int8_t bundles[2][NUM_MODES] = {
+int8_t bundles[NUM_BUNDLES][NUM_MODES] = {
   {0, 1, 2, 3, 4, 5, 6, 7},
   {3, 4, 5, -1, -1, -1, -1, -1},
+  {0, 7, 0, 3, 0, 2, -1, -1},
+  {3, -1, -1, -1, -1, -1, -1, -1},
 };
 uint8_t cur_bundle = 0;
 uint8_t cur_bundle_idx = 0;
@@ -100,6 +103,8 @@ uint16_t since_press = 0;
 bool conjure = false;
 bool conjure_off = false;
 
+
+// SETUP MODES HERE
 void setupModes() {
   // Set num_colors, mode primes, and prime palettes here
   // Mode0 - no primes, no config!
@@ -362,14 +367,16 @@ void enterSleep() {
   // Wait until button is releaed
   uint16_t held_count = 0;
   while (digitalRead(PIN_BUTTON) == LOW) {
-    if (limiter > 64000) {
+    if (limiter >= 64000) {
       limiter = 0;
       held_count++;
     }
     if (held_count > 1500) {
       flash(128, 0, 0, 5);
-    } else if (held_count > 2500) {
-      flash(0, 128, 0, 5);
+      cur_bundle = (cur_bundle + 1) % NUM_BUNDLES;
+      Serial.print(F("next bundle "));
+      Serial.println(cur_bundle);
+      held_count -= 1000;
     }
   }
 
@@ -484,7 +491,7 @@ void incMode() {
 void flash(uint8_t r, uint8_t g, uint8_t b, uint8_t flashes) {
   for (uint8_t i = 0; i < flashes; i++) {
     for (uint8_t j = 0; j < 100; j++) {
-      if (j < 100) {
+      if (j < 50) {
         writeFrame(r, g, b);
       } else {
         writeFrame(0, 0, 0);

@@ -209,7 +209,7 @@ void DualMode::updateAcc(float fxg, float fyg, float fzg) {
   float pitch;
 
   switch (acc_mode) {
-    case A_SHAKE:
+    case A_SPEED:
       if (cur_variant == 0) {
         if (abs(fxg) > 1.45 || abs(fyg) > 1.45 || abs(fzg) > 1.45) {
           acc_counter++;
