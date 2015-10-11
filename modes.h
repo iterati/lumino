@@ -109,6 +109,23 @@ class MorphPrime : public Prime {
     uint8_t cur_color;
 };
 
+class FadePrime : public Prime {
+  public:
+    FadePrime(uint16_t color_time, uint16_t blank_time, uint8_t dir) :
+      Prime(), color_time(color_time), blank_time(blank_time), dir(dir),
+      total_time(color_time + blank_time), num_colors(0) {}
+
+    void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b);
+    void reset();
+    void incTick();
+
+    uint16_t color_time, blank_time, total_time;
+    uint8_t palette[8];
+    uint8_t num_colors;
+    uint8_t cur_color;
+    uint8_t dir;
+};
+
 
 // Modes are what we can switch between. Currently there are 2 modes, SingleMode
 // and DualMode. SingleMode uses one prime and doesn't use the accelerometer.

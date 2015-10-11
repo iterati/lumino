@@ -174,6 +174,53 @@ void MorphPrime::incTick() {
 }
 
 
+void FadePrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
+  if (tick < color_time) {
+    uint8_t rr, gg, bb;
+    uint8_t half_time = color_time >> 1;
+    float dr, dg, db;
+    unpackColor(palette[cur_color], &rr, &gg, &bb);
+
+    if (dir == 0) {
+      dr = 0 + (tick * ((float)rr / (float)color_time));
+      dg = 0 + (tick * ((float)gg / (float)color_time));
+      db = 0 + (tick * ((float)bb / (float)color_time));
+    } else if (dir == 1) {
+      dr = rr - (tick * ((float)rr / (float)color_time));
+      dg = gg - (tick * ((float)gg / (float)color_time));
+      db = bb - (tick * ((float)bb / (float)color_time));
+    } else {
+      if (tick > half_time) {
+        dr = 0 + (tick * ((float)rr / (float)half_time));
+        dg = 0 + (tick * ((float)gg / (float)half_time));
+        db = 0 + (tick * ((float)bb / (float)half_time));
+      } else {
+        dr = rr - ((tick - half_time) * ((float)rr / (float)half_time));
+        dg = gg - ((tick - half_time) * ((float)gg / (float)half_time));
+        db = bb - ((tick - half_time) * ((float)bb / (float)half_time));
+      }
+    }
+
+    *r = dr; *g = dg; *b = db;
+  } else {
+    *r = 0; *g = 0; *b = 0;
+  }
+}
+
+void FadePrime::reset() {
+  tick = 0;
+  cur_color = 0;
+}
+
+void FadePrime::incTick() {
+  tick++;
+  if (tick >= total_time) {
+    tick = 0;
+    cur_color = (cur_color + 1) % num_colors;
+  }
+}
+
+
 void SingleMode::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   uint8_t rr, gg, bb;
   prime->render(&rr, &gg, &bb);
