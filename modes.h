@@ -149,7 +149,7 @@ class DualMode : public Mode {
 
     uint8_t acc_mode;
     uint8_t cur_variant;
-    int8_t acc_counter;
+    int16_t acc_counter;
     Prime *prime[2];
 };
 

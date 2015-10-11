@@ -208,57 +208,58 @@ void DualMode::reset() {
 void DualMode::updateAcc(float fxg, float fyg, float fzg) {
   float pitch;
 
-  if (cur_variant == 0) {
-    switch (acc_mode) {
-      case A_SHAKE:
-        if (abs(fxg) > 1.4 || abs(fyg) > 1.4 || abs(fzg) > 1.4) {
-          acc_counter += 5;
+  switch (acc_mode) {
+    case A_SHAKE:
+      if (cur_variant == 0) {
+        if (abs(fxg) > 1.45 || abs(fyg) > 1.45 || abs(fzg) > 1.45) {
+          acc_counter++;
         } else {
           acc_counter--;
         }
-        acc_counter = max(acc_counter, 0);
+        if (acc_counter < 0) acc_counter = 0;
         if (acc_counter >= 50) {
           cur_variant = 1;
-          acc_counter += 20;
+          acc_counter = 100;
         }
-        break;
-      case A_TILTX:
-        pitch = (atan2(fxg, sqrt(fyg * fyg + fzg * fzg)) * 180.0) / M_PI;
-        cur_variant = pitch < -75;
-        break;
-      case A_TILTY:
-        pitch = (atan2(fyg, sqrt(fxg * fxg + fzg * fzg)) * 180.0) / M_PI;
-        cur_variant = pitch < -75;
-        break;
-      default:
-        cur_variant = fzg < -0.9;
-        break;
-    }
-  } else {
-    switch (acc_mode) {
-      case A_SHAKE:
-        if (abs(fxg) > 1.35 || abs(fyg) > 1.35 || abs(fzg) > 1.35) {
-          acc_counter += 5;
+      } else {
+        if (abs(fxg) > 1.1 || abs(fyg) > 1.1 || abs(fzg) > 1.1) {
+          acc_counter++;
         } else {
           acc_counter--;
         }
-        if (acc_counter == 0) {
+        if (acc_counter <= 0) {
           cur_variant = 0;
-        } else if (acc_counter > 100) {
-          acc_counter = 100;
+        } else if (acc_counter > 150) {
+          acc_counter = 150;
         }
-        break;
-      case A_TILTX:
-        pitch = (atan2(fxg, sqrt(fyg * fyg + fzg * fzg)) * 180.0) / M_PI;
+      }
+      break;
+
+    case A_TILTX:
+      pitch = (atan2(fxg, sqrt(fyg * fyg + fzg * fzg)) * 180.0) / M_PI;
+      if (cur_variant == 0) {
+        cur_variant = pitch < -75;
+      } else {
         cur_variant = pitch < 75;
-        break;
-      case A_TILTY:
-        pitch = (atan2(fyg, sqrt(fxg * fxg + fzg * fzg)) * 180.0) / M_PI;
+      }
+      break;
+
+    case A_TILTY:
+      pitch = (atan2(fyg, sqrt(fxg * fxg + fzg * fzg)) * 180.0) / M_PI;
+      if (cur_variant == 0) {
+        cur_variant = pitch < -75;
+      } else {
         cur_variant = pitch < 75;
-        break;
-      default:
+      }
+
+      break;
+    default:  // TILTZ
+      if (cur_variant == 0) {
+        cur_variant = fzg < -0.9;
+      } else {
         cur_variant = fzg < 0.9;
-    }
+      }
+      break;
   }
 }
 
