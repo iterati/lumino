@@ -45,6 +45,10 @@ light will turn off.
 
 To enable conjuring mode, hold the button in for 3s until the light flashes blue. Upon release, conjuring mode will be enabled and the light will turn on and off with a single press. To reenable normal use, hold the button in for 3s again. Turning the light off in conjuring mode doesn't actually turn the light off, it only turns off the bulb. The CPU will still be cycling and taking up battery. To turn off the light from conjuring mode, just hold the button for 1s as usual. Turning the light off will disable conjuring mode the next time the light is turned on.
 
+## Bundles
+
+With the light turned off, hold the button in for 1.5s and it will flash red and cycle to the next bundle. The current mode when next turned on will be the first mode of the selected bundle.
+
 
 # Configuration
 
