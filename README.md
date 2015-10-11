@@ -3,8 +3,8 @@
 Lumino is an open and straightforward framework for the Open Source Microlight. The goal of this framework is to be flexible enough to allow for modes of differing structure. Live configuration of modes is not planned, so some familiarity with the code is required. The code is structured in such a way that configuration is simple enough for newbies and experienced developers alike.
 
 Current Features:
-* 4 Modes (SingleMode, DualMode, TriMode, and TiltMorph)
-* 4 Primes (Strobe, Tracer, Blink-E, and Morph) with 1 to 8 color palettes
+* 5 Modes (SingleMode, DualMode, TriMode, TiltMorph, and Speeder)
+* 5 Primes (Strobe, Tracer, Blink-E, Morph, and Fade) with 1 to 8 color palettes
 * 32 (31 + blank) Color palette with 4 shades per color
 * Conjuring mode
 
@@ -28,12 +28,12 @@ Press the button to cycle between modes.
 **Default Modes**
 
 1. TiltMorph
-2. 8 colors with red (level), green (tilt fingers up), or blue (tilt fingers down) tracer.
-3. 8 colors with red (level), green (tilt hand right), blue (tilt hand left) tracer.
+2. TriMode with 8 color palettes with red (level), green (tilt fingers up), or blue (tilt fingers down) tracers.
+3. Speeder with red->green (slow), green->blue (medium), blue->red (fast) strobie.
 4. White with 7 color dim trail blink-e when slow, 8 color strobie when fast.
-5. 8 color strobe at start and when fingers down, 8 color strobie when fingers up.
-6. 8 color strobe at start and when hand tilted left, 8 color strobie when hand tilted right.
-7. 8 color strobe when hand rightside up, 8 color strobie when hand upside down.
+5. 8 color fade out (down), strobe morph (up).
+6. 4 color palette red->cyan (left) and 4 color palette cyan->red (right) strobe.
+7. 4 color palette purple->yellow (button up) and 4 color palette yellow->purple (button down) strobe.
 8. 8 color hyperstrobe morph.
 
 ## Turning off the light
@@ -96,6 +96,12 @@ Some modes will use animation primes as a base for the mode. Primes, like Modes,
 
 * Color time - ms color is shown and blended before changing
 * Blank time - ms blank is shown
+
+### FadePrime(color time, blank time, direction)
+
+* Color time - ms color is shown before changing
+* Blank time - ms blank is shown
+* Direction - 0 for fade in, 1 for fade out
 
 ## Examples
 
