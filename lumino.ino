@@ -57,7 +57,7 @@ SingleMode mode7 = SingleMode();
 MorphPrime prime70 = MorphPrime(17, 17);
 
 int8_t bundles[NUM_BUNDLES][NUM_MODES] = {
-  {2, 1, 2, 3, 4, 5, 6, 7},
+  {0, 1, 2, 3, 4, 5, 6, 7},
   {3, 4, 5, -1, -1, -1, -1, -1},
   {0, 7, 0, 3, 0, 2, -1, -1},
   {3, -1, -1, -1, -1, -1, -1, -1},
