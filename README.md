@@ -131,7 +131,6 @@ void setupModes() {
                                       // + 0x80 dims the shade 2 levels.
     prime00.palette[2] = 0x00;        // 0x00 (and 0x40, 0x80, 0xc0) indicates blank.
     mode0.prime = &prime00;           // Point mode0.prime to prime00.
-    mode0.reset();                    // Last step after setting up mode.
 
     <snip>
 ```
@@ -172,7 +171,6 @@ void setupModes() {
 
     mode0.prime[0] = &prime00;        // Point mode0.prime[0] to prime00.
     mode0.prime[1] = &prime01;        // Point mode0.prime[1] to prime01.
-    mode0.reset();                    // Last step after setting up mode.
 
     <snip>
 ```
@@ -216,7 +214,6 @@ void setupModes() {
     mode0.prime[0] = &prime00;        // Point mode0.prime[0] to prime00.
     mode0.prime[1] = &prime01;        // Point mode0.prime[1] to prime01.
     mode0.prime[2] = &prime02;        // Point mode0.prime[2] to prime02.
-    mode0.reset();                    // Last step after setting up mode.
 
     <snip>
 ```
@@ -273,12 +270,13 @@ void setupModes() {
     mode0.prime[0] = &prime00;        // Point mode0.prime[0] to prime00.
     mode0.prime[1] = &prime01;        // Point mode0.prime[1] to prime01.
     mode0.prime[2] = &prime02;        // Point mode0.prime[2] to prime02.
-    mode0.reset();                    // Last step after setting up mode.
 
     <snip>
 ```
 
 ### TiltMorph(sensitivity)
+
+TiltMorph needs no setup in setupModes.
 
 * Sensitivity - mostly used for smoothing transitions. Recommended 0.05.
 
@@ -287,12 +285,6 @@ void setupModes() {
 TiltMorph mode0 = TiltMorph();  // Create a tiltmorph mode named mode0
 
 <snip>
-
-// SETUP MODES HERE
-void setupModes() {
-    mode0.reset();  // Be sure to reset even the TiltMorph mode.
-
-    <snip>
 ```
 
 ## Number of Modes
