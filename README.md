@@ -57,7 +57,7 @@ Currently all configuration must be done in code. You can configure the color pa
 
 ## Palette Config
 
-You can configure your palette by editing the ```color_palette``` array located at the top of ```modes.cpp```. Values from 0 to 255 will work with 255 being full power. Lumino uses a gamma-curved palette to provide a more relative brightness. This means that a palette value of (64, 0, 0) should be red and about half as bright as (128, 0, 0).
+You can configure your palette by editing the **color_palette** array located at the top of **modes.cpp** Values from 0 to 255 will work with 255 being full power. Lumino uses a gamma-curved palette to provide a more relative brightness. This means that a palette value of (64, 0, 0) should be red and about half as bright as (128, 0, 0).
 
 Colors are listed in modes.cpp and have their hex number documented next to them. For instance, red (255, 0, 0) is marked as (0x08). Each level of dimness applied by adding 0x40 to the value. So the different dimnesses of red are 0x08, 0x48, 0x88, and 0xc8. Since the value is hex (base16) values for 10 - 15 (16 is 0x10), are a (10), b (11), c (12), d (13), e (14), and f (15). The dimmest blue is 0xd8. 0x18 (the hex value for blue) + 0xc0 (c(12) + 1 = d(13)).
 
@@ -65,16 +65,17 @@ If you wish to use less colors, you can leave them set as they are for later and
 
 ## Mode Config
 
-Each mode will have it's own configuration options. The best way to know what is configurable on a mode is to look at the header file ```modes.h```. Modes and their documentation are at the end of the file.  There are currently 3 modes:
+Each mode will have it's own configuration options. The best way to know what is configurable on a mode is to look at the header file **modes.h** Modes and their documentation are at the end of the file.  There are currently 5 modes:
 
 * SingleMode - Uses a single prime with no accelerometer magic.
 * DualMode - Can be configured to switch between primes based on speed or tilt along the X, Y, or Z axes.
-* Tilted - Can be configured to switch between three primes based on tilt along the X or Y axes.
+* TriMode (Tilt) - Can be configured to switch between three primes based on tilt along the X or Y axes.
+* Speeder - Three primes change based on speed (slow, medium, fast)
 * TiltMorph - Hue slowly cycles along the color wheel. The light's roll alters the hue and the pitch changes the strobe timings.
 
 ## Primes
 
-Some modes will use animation primes as a base for the mode. Primes, like Modes, are defined and documented in ```modes.h```. Primes should be at the top of the file above the modes. There are currently 3 Primes:
+Some modes will use animation primes as a base for the mode. Primes, like Modes, are defined and documented in **modes.h** Primes should be at the top of the file above the modes. There are currently 3 Primes:
 
 * Strobe - On/off through up to an 8 color palette
 * Tracer - Tracer/color through up to an 8 color palette (plus tracer color)
@@ -219,6 +220,63 @@ void setupModes() {
     <snip>
 ```
 
+### Speeder(sensitivity)
+
+* Trigger type - Either A_TILTX or A_TILTY. Changes when pointing up or down (left or right) and back when above or below flat again.
+* Sensitivity - Recommended 0.5 or higher.
+
+```
+// DECLARE MODES HERE. Palettes go in setupModes()
+Speeder mode0 = Speeder(0.9);                   // Create a Speeder with a high sensitivity.
+StrobePrime prime00 = StrobePrime(3, 23);       // Create a strobie called prime00.
+                                                // This is the slow variant.
+StrobePrime prime01 = StrobePrime(3, 23);       // Create a strobie called prime01.
+                                                // This is the medium variant.
+StrobePrime prime02 = StrobePrime(3, 23);       // Create a strobie called prime02.
+                                                // This is the fast variant.
+<snip>
+
+// SETUP MODES HERE
+void setupModes() {
+    prime20.num_colors = 8;           // Setup num_colors and palettes
+    prime20.palette[0] = 0x08;        // First palette is all reds->green
+    prime20.palette[1] = 0x09;
+    prime20.palette[2] = 0x0a;
+    prime20.palette[3] = 0x0b;
+    prime20.palette[4] = 0x0c;
+    prime20.palette[5] = 0x0d;
+    prime20.palette[6] = 0x0e;
+    prime20.palette[7] = 0x0f;
+    mode2.prime[0] = &prime20;
+
+    prime21.num_colors = 8;
+    prime21.palette[0] = 0x10;        // Second palette is all green->blue
+    prime21.palette[1] = 0x11;
+    prime21.palette[2] = 0x12;
+    prime21.palette[3] = 0x13;
+    prime21.palette[4] = 0x14;
+    prime21.palette[5] = 0x15;
+    prime21.palette[6] = 0x16;
+    prime21.palette[7] = 0x17;
+
+    prime22.num_colors = 8;
+    prime22.palette[0] = 0x18;        // Last palette is blue->red
+    prime22.palette[1] = 0x19;
+    prime22.palette[2] = 0x1a;
+    prime22.palette[3] = 0x1b;
+    prime22.palette[4] = 0x1c;
+    prime22.palette[5] = 0x1d;
+    prime22.palette[6] = 0x1e;
+    prime22.palette[7] = 0x1f;
+
+    mode0.prime[0] = &prime00;        // Point mode0.prime[0] to prime00.
+    mode0.prime[1] = &prime01;        // Point mode0.prime[1] to prime01.
+    mode0.prime[2] = &prime02;        // Point mode0.prime[2] to prime02.
+    mode0.reset();                    // Last step after setting up mode.
+
+    <snip>
+```
+
 ### TiltMorph(sensitivity)
 
 * Sensitivity - mostly used for smoothing transitions. Recommended 0.05.
@@ -238,17 +296,17 @@ void setupModes() {
 
 ## Number of Modes
 
-The number of modes can be changed to any number only limited by what modes will fit in memory. To do this, a number of things must happen in ```lumino.ino```:
+The number of modes can be changed to any number only limited by what modes will fit in memory. To do this, a number of things must happen in **lumino.ino**
 
-* The line ```#define NUM_MODES``` must be set
+* The line **define NUM_MODES** must be set
 * You must declare each mode (and it's primes) as shown
 * You must configure each mode in the setupModes function
-* You must add a pointer to the mode to the line beginning ```Mode *modes[NUM_MODES]```
+* You must add a pointer to the mode to the line beginning **Mode *modes[NUM_MODES]**
 (use & in front of the variable name e.g. &mode13)
 
 ## Bundles
 
-The number of bundles are defined in the line ```#define NUM_BUNDLES```. You must have that number of bundles defined in the bundles array.
+The number of bundles are defined in the line **define NUM_BUNDLES**. You must have that number of bundles defined in the bundles array. The first -1 found in the bundle array indicates that that index and the ones following it are unused.
 
 ### Example Bundle Config
 

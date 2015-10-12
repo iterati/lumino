@@ -28,9 +28,9 @@ TracerPrime prime12 = TracerPrime(3, 23, 0xd8); // Hand down - blue tracer
 
 // Mode2
 Speeder mode2 = Speeder(0.9);
-StrobePrime prime20 = StrobePrime(3, 23); // Hand flat
-StrobePrime prime21 = StrobePrime(3, 23); // Turn hand right
-StrobePrime prime22 = StrobePrime(3, 23); // Turn hand left
+StrobePrime prime20 = StrobePrime(3, 23); // Slow
+StrobePrime prime21 = StrobePrime(3, 23); // Medium
+StrobePrime prime22 = StrobePrime(3, 23); // Fast
 
 // Mode3
 DualMode mode3 = DualMode(A_SPEED, 0.75);
