@@ -75,12 +75,13 @@ Each mode will have it's own configuration options. The best way to know what is
 
 ## Primes
 
-Some modes will use animation primes as a base for the mode. Primes, like Modes, are defined and documented in **modes.h** Primes should be at the top of the file above the modes. There are currently 3 Primes:
+Some modes will use animation primes as a base for the mode. Primes, like Modes, are defined and documented in **modes.h** Primes should be at the top of the file above the modes. There are currently 5 Primes:
 
 * Strobe - On/off through up to an 8 color palette
 * Tracer - Tracer/color through up to an 8 color palette (plus tracer color)
 * Blink-E - Color/color/color../blank through up to an 8 color palette
 * Morph - Color blends to next color/blank time through an up to 8 color palette
+* Fade - Color fades in or out/blank through up to an 8 color palette
 
 ### StrobePrime(color time, blank time)
 
