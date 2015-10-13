@@ -204,6 +204,36 @@ void FadePrime::incTick() {
 }
 
 
+void RainbowPrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
+  if (tick < color_time) {
+    unpackHue(hue + (split * split_dist), &color_r, &color_g, &color_b);
+    *r = color_r; *g = color_g; *b = color_b;
+  } else {
+    *r = 0; *g = 0; *b = 0;
+  }
+}
+
+void RainbowPrime::reset() {
+  tick = 0;
+  hue = 0;
+  split = 0;
+  hue_tick = speed;
+}
+
+void RainbowPrime::incTick() {
+  tick++;
+  if (tick >= total_time) {
+    tick = 0;
+    split = (split + 1) % splits;
+  }
+  hue_tick--;
+  if (hue_tick == 0) {
+    hue = (hue + 1) % 1536;
+    hue_tick = speed;
+  }
+}
+
+
 void SingleMode::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   uint8_t rr, gg, bb;
   prime->render(&rr, &gg, &bb);
@@ -323,6 +353,8 @@ void TriMode::updateAcc(float fxg, float fyg, float fzg) {
     pitch = (atan2(fyg, sqrt(fxg * fxg + fzg * fzg)) * 180.0) / M_PI;
   }
 
+  Serial.println(pitch);
+
   switch (cur_variant) {
     case 0:
       if (pitch < -75) {
@@ -413,33 +445,36 @@ void Speeder::reset() {
 
 void Speeder::updateAcc(float fxg, float fyg, float fzg) {
   float pitch;
-  maxg = (max(max(abs(fxg), abs(fyg)), abs(fzg)) * 0.05) + (maxg * 0.95);
-  if (maxg > 1.55) {
-    acc_counter += 6;
-  } else if (maxg > 1.3) {
-    acc_counter += 4;
-  } else if (maxg > 1.1) {
+  uint8_t level;
+  maxg = max(max(abs(fxg), abs(fyg)), abs(fzg));
+  if (maxg >= 1.5) {
+    acc_counter += 8;
+  } else if (maxg >= 1.3) {
+    acc_counter += 5;
+  } else if (maxg >= 1.1) {
     acc_counter += 2;
-  } else
+  } else {
+    /* acc_counter--; */
+  }
   if (acc_counter < 0) acc_counter = 0;
   if (cur_variant == 0) {
-    if (acc_counter > 1000) {
+    if (acc_counter > 250) {
       cur_variant = 1;
     }
     acc_counter--;
   } else if (cur_variant == 1) {
-    if (acc_counter < 500) {
+    if (acc_counter <= 0) {
       cur_variant = 0;
-    } else if (acc_counter > 3000) {
+    } else if (acc_counter > 2000) {
       cur_variant = 2;
     }
-    acc_counter -= 2;
-  } else {
-    if (acc_counter < 2000) {
-      cur_variant = 1;
-    } else if (acc_counter > 4000) {
-      acc_counter = 4000;
-    }
     acc_counter -= 3;
+  } else {
+    if (acc_counter < 1500) {
+      cur_variant = 1;
+    } else if (acc_counter > 2250) {
+      acc_counter = 2250;
+    }
+    acc_counter -= 5;
   }
 }

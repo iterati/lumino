@@ -39,11 +39,11 @@ TracerPrime prime11 = TracerPrime(3, 23, 0xd0); // Tilt hand up - green tracer
 TracerPrime prime12 = TracerPrime(3, 23, 0xd8); // Hand down - blue tracer
 
 // Mode2 - Speeder with high sensitivity.
-// 8 color strobies with different color warmths depending on speed. Warmer = faster
+// Rainbow splits up and goes from strobie to strobe to hyperstrobe
 Speeder mode2 = Speeder(0.9);
-StrobePrime prime20 = StrobePrime(3, 23); // Slow
-StrobePrime prime21 = StrobePrime(3, 23); // Medium
-StrobePrime prime22 = StrobePrime(3, 23); // Fast
+RainbowPrime prime20 = RainbowPrime(3, 23, 1, 256, 2);
+RainbowPrime prime21 = RainbowPrime(5, 8, 2, 256, 2);
+RainbowPrime prime22 = RainbowPrime(17, 17, 3, 256, 2);
 
 // Mode3 - Speed DualMode with Blink-E for slow and full spectrum Strobie for fast
 DualMode mode3 = DualMode(A_SPEED, 0.75);
@@ -133,37 +133,38 @@ void setupModes() {
   mode1.prime[2] = &prime12;
 
   // Mode2
-  prime20.num_colors = 8;
-  prime20.palette[0] = 0x17;
-  prime20.palette[1] = 0x16;
-  prime20.palette[2] = 0x15;
-  prime20.palette[3] = 0x14;
-  prime20.palette[4] = 0x13;
-  prime20.palette[5] = 0x12;
-  prime20.palette[6] = 0x11;
-  prime20.palette[7] = 0x10;
+  /* prime20.num_colors = 8; */
+  /* prime20.palette[0] = 0x17; */
+  /* prime20.palette[1] = 0x16; */
+  /* prime20.palette[2] = 0x15; */
+  /* prime20.palette[3] = 0x14; */
+  /* prime20.palette[4] = 0x13; */
+  /* prime20.palette[5] = 0x12; */
+  /* prime20.palette[6] = 0x11; */
+  /* prime20.palette[7] = 0x10; */
+
+  /* prime21.num_colors = 8; */
+  /* prime21.palette[0] = 0x0f; */
+  /* prime21.palette[1] = 0x0e; */
+  /* prime21.palette[2] = 0x0d; */
+  /* prime21.palette[3] = 0x0c; */
+  /* prime21.palette[4] = 0x0f; */
+  /* prime21.palette[5] = 0x0e; */
+  /* prime21.palette[6] = 0x0d; */
+  /* prime21.palette[7] = 0x0c; */
+
+  /* prime22.num_colors = 8; */
+  /* prime22.palette[0] = 0x0b; */
+  /* prime22.palette[1] = 0x0a; */
+  /* prime22.palette[2] = 0x09; */
+  /* prime22.palette[3] = 0x08; */
+  /* prime22.palette[4] = 0x1b; */
+  /* prime22.palette[5] = 0x1a; */
+  /* prime22.palette[6] = 0x19; */
+  /* prime22.palette[7] = 0x18; */
+
   mode2.prime[0] = &prime20;
-
-  prime21.num_colors = 8;
-  prime21.palette[0] = 0x0f;
-  prime21.palette[1] = 0x0e;
-  prime21.palette[2] = 0x0d;
-  prime21.palette[3] = 0x0c;
-  prime21.palette[4] = 0x0f;
-  prime21.palette[5] = 0x0e;
-  prime21.palette[6] = 0x0d;
-  prime21.palette[7] = 0x0c;
   mode2.prime[1] = &prime21;
-
-  prime22.num_colors = 8;
-  prime22.palette[0] = 0x0b;
-  prime22.palette[1] = 0x0a;
-  prime22.palette[2] = 0x09;
-  prime22.palette[3] = 0x08;
-  prime22.palette[4] = 0x1b;
-  prime22.palette[5] = 0x1a;
-  prime22.palette[6] = 0x19;
-  prime22.palette[7] = 0x18;
   mode2.prime[2] = &prime22;
 
   // Mode3

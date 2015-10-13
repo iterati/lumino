@@ -126,6 +126,22 @@ class FadePrime : public Prime {
     uint8_t dir;
 };
 
+class RainbowPrime : public Prime {
+  public:
+    RainbowPrime(uint16_t color_time, uint8_t blank_time,
+        uint16_t splits, uint16_t split_dist, uint16_t speed) :
+      Prime(), color_time(color_time), blank_time(blank_time), total_time(color_time + blank_time),
+      splits(splits), split_dist(split_dist), speed(speed) {}
+
+    void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b);
+    void reset();
+    void incTick();
+
+    uint16_t color_time, blank_time, total_time;
+    uint16_t splits, split_dist, speed;
+    uint16_t split, hue_tick;
+    uint16_t hue;
+};
 
 // Modes are what we can switch between. Currently there are 2 modes, SingleMode
 // and DualMode. SingleMode uses one prime and doesn't use the accelerometer.
@@ -207,8 +223,8 @@ class Speeder : public Mode {
 
     uint8_t cur_variant;
     int16_t acc_counter;
-    Prime *prime[3];
     float maxg;
+    Prime *prime[3];
 };
 
 #endif
