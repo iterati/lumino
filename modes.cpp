@@ -66,12 +66,21 @@ void unpackColor(uint8_t color, uint8_t *r, uint8_t *g, uint8_t *b) {
   *b = color_palette[idx][2] - ((color_palette[idx][2] >> 2) * shade);
 }
 
+void morphColor(uint16_t tick, uint16_t morph_time,
+                uint8_t r0, uint8_t g0, uint8_t b0,
+                uint8_t r1, uint8_t g1, uint8_t b1,
+                uint8_t *r, uint8_t *g, uint8_t *b) {
+  *r = r0 + (int)(r1 - r0) * (tick / (float)morph_time);
+  *g = g0 + (int)(g1 - g0) * (tick / (float)morph_time);
+  *b = b0 + (int)(b1 - b0) * (tick / (float)morph_time);
+}
+
+
 void StrobePrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   // Show a color and then blank
   if (tick < color_time) {
-    uint8_t rr, gg, bb;
-    unpackColor(palette[cur_color], &rr, &gg, &bb);
-    *r = rr; *g = gg; *b = bb;
+    unpackColor(palette[cur_color], &color_r, &color_g, &color_b);
+    *r = color_r; *g = color_g; *b = color_b;
   } else {
     *r = 0; *g = 0; *b = 0;
   }
@@ -94,13 +103,11 @@ void StrobePrime::incTick() {
 void TracerPrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   // Show a color and then the tracer color
   if (tick < color_time) {
-    uint8_t rr, gg, bb;
-    unpackColor(palette[cur_color], &rr, &gg, &bb);
-    *r = rr; *g = gg; *b = bb;
+    unpackColor(palette[cur_color], &color_r, &color_g, &color_b);
+    *r = color_r; *g = color_g; *b = color_b;
   } else {
-    uint8_t rr, gg, bb;
-    unpackColor(tracer_color, &rr, &gg, &bb);
-    *r = rr; *g = gg; *b = bb;
+    unpackColor(tracer_color, &color_r, &color_g, &color_b);
+    *r = color_r; *g = color_g; *b = color_b;
   }
 }
 
@@ -120,9 +127,8 @@ void TracerPrime::incTick() {
 
 void BlinkEPrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   if (tick < (num_colors * color_time)) {
-    uint8_t rr, gg, bb;
-    unpackColor(palette[(tick / color_time)], &rr, &gg, &bb);
-    *r = rr; *g = gg; *b = bb;
+    unpackColor(palette[(tick / color_time)], &color_r, &color_g, &color_b);
+    *r = color_r; *g = color_g; *b = color_b;
   } else {
     *r = 0; *g = 0; *b = 0;
   }
@@ -145,16 +151,11 @@ void MorphPrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   if (tick < color_time) {
     uint8_t r0, g0, b0;
     uint8_t r1, g1, b1;
-    float dr, dg, db;
 
     unpackColor(palette[cur_color], &r0, &g0, &b0);
     unpackColor(palette[(cur_color + 1) % num_colors], &r1, &g1, &b1);
-
-    dr = r0 + (tick * ((float)(r1 - r0) / (float)color_time));
-    dg = g0 + (tick * ((float)(g1 - g0) / (float)color_time));
-    db = b0 + (tick * ((float)(b1 - b0) / (float)color_time));
-
-    *r = dr; *g = dg; *b = db;
+    morphColor(tick, color_time, r0, g0, b0, r1, g1, b1, &color_r, &color_g, &color_b);
+    *r = color_r; *g = color_g; *b = color_b;
   } else {
     *r = 0; *g = 0; *b = 0;
   }
@@ -177,31 +178,13 @@ void MorphPrime::incTick() {
 void FadePrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   if (tick < color_time) {
     uint8_t rr, gg, bb;
-    uint8_t half_time = color_time >> 1;
-    float dr, dg, db;
     unpackColor(palette[cur_color], &rr, &gg, &bb);
-
     if (dir == 0) {
-      dr = 0 + (tick * ((float)rr / (float)color_time));
-      dg = 0 + (tick * ((float)gg / (float)color_time));
-      db = 0 + (tick * ((float)bb / (float)color_time));
-    } else if (dir == 1) {
-      dr = rr - (tick * ((float)rr / (float)color_time));
-      dg = gg - (tick * ((float)gg / (float)color_time));
-      db = bb - (tick * ((float)bb / (float)color_time));
+      morphColor(tick, color_time, 0, 0, 0, rr, gg, bb, &color_r, &color_g, &color_b);
     } else {
-      if (tick > half_time) {
-        dr = 0 + (tick * ((float)rr / (float)half_time));
-        dg = 0 + (tick * ((float)gg / (float)half_time));
-        db = 0 + (tick * ((float)bb / (float)half_time));
-      } else {
-        dr = rr - ((tick - half_time) * ((float)rr / (float)half_time));
-        dg = gg - ((tick - half_time) * ((float)gg / (float)half_time));
-        db = bb - ((tick - half_time) * ((float)bb / (float)half_time));
-      }
+      morphColor(tick, color_time, rr, gg, bb, 0, 0, 0, &color_r, &color_g, &color_b);
     }
-
-    *r = dr; *g = dg; *b = db;
+    *r = color_r; *g = color_g; *b = color_b;
   } else {
     *r = 0; *g = 0; *b = 0;
   }
