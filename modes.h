@@ -188,9 +188,9 @@ class DualMode : public Mode {
 };
 
 
-class TriMode : public Mode {
+class TriTilt : public Mode {
   public:
-    TriMode(uint8_t tilt_axis, float alpha) : Mode(alpha), tilt_axis(tilt_axis) {}
+    TriTilt(uint8_t tilt_axis, float alpha) : Mode(alpha), tilt_axis(tilt_axis) {}
 
     void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b);
     void reset();
@@ -213,9 +213,9 @@ class TiltMorph : public Mode {
     uint8_t color_time;
 };
 
-class Speeder : public Mode {
+class TriSpeed : public Mode {
   public:
-    Speeder(float alpha) : Mode(alpha) {}
+    TriSpeed(float alpha) : Mode(alpha) {}
 
     void render(uint8_t *led_r, uint8_t *led_g, uint8_t *led_b);
     void reset();

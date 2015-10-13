@@ -31,19 +31,19 @@
 // Mode0 - TiltMorph with low sensitivity
 TiltMorph mode0 = TiltMorph(0.05);
 
-// Mode1 - TriMode for fingers up and down with low sensitivity.
+// Mode1 - TriTilt for fingers up and down with low sensitivity.
 // 8 color full-spectrum palette with red, green, or blue tracer depending on the prime.
-TriMode mode1 = TriMode(A_TILTX, 0.05);
-TracerPrime prime10 = TracerPrime(3, 23, 0xc8); // Hand flat - red tracer
-TracerPrime prime11 = TracerPrime(3, 23, 0xd0); // Tilt hand up - green tracer
-TracerPrime prime12 = TracerPrime(3, 23, 0xd8); // Hand down - blue tracer
+TriTilt mode1 = TriTilt(A_TILTX, 0.05);
+TracerPrime prime10 = TracerPrime(5, 25, 0xb8); // Hand flat - red tracer
+TracerPrime prime11 = TracerPrime(5, 25, 0xba); // Tilt hand up - green tracer
+TracerPrime prime12 = TracerPrime(5, 25, 0xbc); // Hand down - blue tracer
 
-// Mode2 - Speeder with high sensitivity.
+// Mode2 - TriSpeed with high sensitivity.
 // Rainbow splits up and goes from strobie to strobe to hyperstrobe
-Speeder mode2 = Speeder(0.9);
-RainbowPrime prime20 = RainbowPrime(3, 23, 1, 256, 2);
-RainbowPrime prime21 = RainbowPrime(5, 8, 2, 256, 2);
-RainbowPrime prime22 = RainbowPrime(17, 17, 3, 256, 2);
+TriSpeed mode2 = TriSpeed(0.9);
+RainbowPrime prime20 = RainbowPrime(3,  23, 1, 0,   2);
+RainbowPrime prime21 = RainbowPrime(5,  8,  3, 128, 2);
+RainbowPrime prime22 = RainbowPrime(17, 17, 6, 64,  2);
 
 // Mode3 - Speed DualMode with Blink-E for slow and full spectrum Strobie for fast
 DualMode mode3 = DualMode(A_SPEED, 0.75);
@@ -57,8 +57,8 @@ MorphPrime prime41 = MorphPrime(50, 5);  // Tilt up - morph
 
 // Mode5 - Half the color wheel for left and right
 DualMode mode5 = DualMode(A_TILTY, 0.05);
-StrobePrime prime50 = StrobePrime(5, 8); // Tilt left
-StrobePrime prime51 = StrobePrime(5, 8); // Tilt right
+MorphPrime prime50 = MorphPrime(5, 8); // Tilt left
+MorphPrime prime51 = MorphPrime(5, 8); // Tilt right
 
 // Mode6 - Half the color wheel for button up and down
 DualMode mode6 = DualMode(A_TILTZ, 0.05);
@@ -133,36 +133,6 @@ void setupModes() {
   mode1.prime[2] = &prime12;
 
   // Mode2
-  /* prime20.num_colors = 8; */
-  /* prime20.palette[0] = 0x17; */
-  /* prime20.palette[1] = 0x16; */
-  /* prime20.palette[2] = 0x15; */
-  /* prime20.palette[3] = 0x14; */
-  /* prime20.palette[4] = 0x13; */
-  /* prime20.palette[5] = 0x12; */
-  /* prime20.palette[6] = 0x11; */
-  /* prime20.palette[7] = 0x10; */
-
-  /* prime21.num_colors = 8; */
-  /* prime21.palette[0] = 0x0f; */
-  /* prime21.palette[1] = 0x0e; */
-  /* prime21.palette[2] = 0x0d; */
-  /* prime21.palette[3] = 0x0c; */
-  /* prime21.palette[4] = 0x0f; */
-  /* prime21.palette[5] = 0x0e; */
-  /* prime21.palette[6] = 0x0d; */
-  /* prime21.palette[7] = 0x0c; */
-
-  /* prime22.num_colors = 8; */
-  /* prime22.palette[0] = 0x0b; */
-  /* prime22.palette[1] = 0x0a; */
-  /* prime22.palette[2] = 0x09; */
-  /* prime22.palette[3] = 0x08; */
-  /* prime22.palette[4] = 0x1b; */
-  /* prime22.palette[5] = 0x1a; */
-  /* prime22.palette[6] = 0x19; */
-  /* prime22.palette[7] = 0x18; */
-
   mode2.prime[0] = &prime20;
   mode2.prime[1] = &prime21;
   mode2.prime[2] = &prime22;
@@ -214,18 +184,22 @@ void setupModes() {
   mode4.prime[1] = &prime41;
 
   // Mode5
-  prime50.num_colors = 4;
-  prime50.palette[0] = 0x08;
-  prime50.palette[1] = 0x0b;
-  prime50.palette[2] = 0x0e;
-  prime50.palette[3] = 0x11;
+  prime50.num_colors = 6;
+  prime50.palette[0] = 0x00;
+  prime50.palette[1] = 0x1f;
+  prime50.palette[2] = 0x00;
+  prime50.palette[3] = 0x00;
+  prime50.palette[4] = 0x16;
+  prime50.palette[5] = 0x00;
   mode5.prime[0] = &prime50;
 
-  prime51.num_colors = 4;
-  prime51.palette[0] = 0x14;
-  prime51.palette[1] = 0x17;
-  prime51.palette[2] = 0x1a;
-  prime51.palette[3] = 0x1d;
+  prime51.num_colors = 6;
+  prime51.palette[0] = 0xd6;
+  prime51.palette[1] = 0x1f;
+  prime51.palette[2] = 0xd6;
+  prime51.palette[3] = 0xdf;
+  prime51.palette[4] = 0x16;
+  prime51.palette[5] = 0xdf;
   mode5.prime[1] = &prime51;
 
   // Mode6

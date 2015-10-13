@@ -3,9 +3,9 @@
 Lumino is an open and straightforward framework for the Open Source Microlight. The goal of this framework is to be flexible enough to allow for modes of differing structure. Live configuration of modes is not planned, so some familiarity with the code is required. The code is structured in such a way that configuration is simple enough for newbies and experienced developers alike.
 
 Current Features:
-* 5 Modes (SingleMode, DualMode, TriMode, TiltMorph, and Speeder)
-* 5 Primes (Strobe, Tracer, Blink-E, Morph, and Fade) with 1 to 8 color palettes
-* 32 (31 + blank) Color palette with 4 shades per color
+* 5 Modes (SingleMode, DualMode, TriTilt, TiltMorph, and TriSpeed)
+* 6 Primes (Strobe, Tracer, Blink-E, Morph, and Fade, Rainbow), most with 1 to 8 color palettes
+* 61 colors + blank (and room for 2 more) with 4 shades per color
 * Conjuring mode
 * Bundles for storing different playback orders for modes
 
@@ -29,12 +29,12 @@ Press the button to cycle between modes.
 **Default Modes**
 
 1. TiltMorph
-2. TriMode with 8 color palettes with red (level), green (tilt fingers up), or blue (tilt fingers down) tracers.
-3. Speeder with red->green (slow), green->blue (medium), blue->red (fast) strobie.
+2. TriTilt with 8 color palettes with red (level), green (tilt fingers up), or blue (tilt fingers down) tracers.
+3. TriSpeed with rainbow that splits up and changes from strobie to strobe to hyperstrobe.
 4. White with 7 color dim trail blink-e when slow, 8 color strobie when fast.
 5. 8 color fade out (down), strobe morph (up).
-6. 4 color palette red->cyan (left) and 4 color palette cyan->red (right) strobe.
-7. 4 color palette purple->yellow (button up) and 4 color palette yellow->purple (button down) strobe.
+6. 4 color palette red-cyan (left) and 4 color palette cyan-red (right) strobe.
+7. 4 color palette purple-yellow (button up) and 4 color palette yellow-purple (button down) strobe.
 8. 8 color hyperstrobe morph.
 
 ## Turning off the light
@@ -69,8 +69,8 @@ Each mode will have it's own configuration options. The best way to know what is
 
 * SingleMode - Uses a single prime with no accelerometer magic.
 * DualMode - Can be configured to switch between primes based on speed or tilt along the X, Y, or Z axes.
-* TriMode (Tilt) - Can be configured to switch between three primes based on tilt along the X or Y axes.
-* Speeder - Three primes change based on speed (slow, medium, fast)
+* TriTilt - Can be configured to switch between three primes based on tilt along the X or Y axes.
+* TriSpeed - Three primes change based on speed (slow, medium, fast)
 * TiltMorph - Hue slowly cycles along the color wheel. The light's roll alters the hue and the pitch changes the strobe timings.
 
 ## Primes
@@ -109,6 +109,14 @@ Some modes will use animation primes as a base for the mode. Primes, like Modes,
 * Color time - ms color is shown before changing
 * Blank time - ms blank is shown
 * Direction - 0 for fade in, 1 for fade out
+
+### RainbowPrime(color time, blank time, splits, split distance, speed)
+
+* Color time - ms color is shown before split changes
+* Blank time - ms blank is shown between splits
+* Splits - number of splits to show, this is how many different color segments are shown
+* Split distance - how far along the color wheel each split is from itself (256 = 1 major color (red to yellow to green to cyan to blue to magenta to red)
+* Speed - ms before hue increments
 
 ## Examples
 
@@ -175,14 +183,14 @@ void setupModes() {
     <snip>
 ```
 
-### TriMode(axis, sensitivity)
+### TriTilt(axis, sensitivity)
 
 * Trigger type - Either A_TILTX or A_TILTY. Changes when pointing up or down (left or right) and back when above or below flat again.
 * Sensitivity - Recommended 0.05 or lower.
 
 ```
 // DECLARE MODES HERE. Palettes go in setupModes()
-TriMode mode0 = TriMode(A_TILTX, 0.05);         // Create a TriMode using the X axis for switching.
+TriTilt mode0 = TriTilt(A_TILTX, 0.05);         // Create a TriTilt using the X axis for switching.
                                                 // 0.05 is a low sensitivity setting.
 TracerPrime prime00 = TracerPrime(3, 23, 0xc8); // Create a tracer prime called prime00.
                                                 // 0xc8 is the dimmest red setting.
@@ -218,14 +226,14 @@ void setupModes() {
     <snip>
 ```
 
-### Speeder(sensitivity)
+### TriSpeed(sensitivity)
 
 * Trigger type - Either A_TILTX or A_TILTY. Changes when pointing up or down (left or right) and back when above or below flat again.
 * Sensitivity - Recommended 0.5 or higher.
 
 ```
 // DECLARE MODES HERE. Palettes go in setupModes()
-Speeder mode0 = Speeder(0.9);                   // Create a Speeder with a high sensitivity.
+TriSpeed mode0 = TriSpeed(0.9);                 // Create a TriSpeed with a high sensitivity.
 StrobePrime prime00 = StrobePrime(3, 23);       // Create a strobie called prime00.
                                                 // This is the slow variant.
 StrobePrime prime01 = StrobePrime(3, 23);       // Create a strobie called prime01.

@@ -3,7 +3,7 @@
 // idx from 00-1f, add 0x40 for each shading level
 // e.g. 0x88 for 2nd dimmest red
 // 0xff indicates first unused color
-static const uint8_t color_palette[32][3] = {
+static const uint8_t color_palette[64][3] = {
   // Blank and whites
   {0, 0, 0},        // 0x00
   {255, 255, 255},  // 0x01
@@ -43,6 +43,43 @@ static const uint8_t color_palette[32][3] = {
   {255, 0, 191},    // 0x1d
   {255, 0, 127},    // 0x1e
   {255, 0, 63},     // 0x1f
+
+  // Red - green
+  {255, 128, 128},  // 0x20
+  {255, 159, 128},  // 0x21
+  {255, 191, 128},  // 0x22
+  {255, 207, 128},  // 0x23
+  {255, 255, 128},  // 0x24
+  {207, 255, 128},  // 0x25
+  {191, 255, 128},  // 0x26
+  {159, 255, 128},  // 0x27
+
+  // Green - blue
+  {128, 255, 128},  // 0x28
+  {128, 255, 159},  // 0x29
+  {128, 255, 191},  // 0x2a
+  {128, 255, 207},  // 0x2b
+  {128, 255, 255},  // 0x2c
+  {128, 207, 255},  // 0x2d
+  {128, 191, 255},  // 0x2e
+  {128, 159, 255},  // 0x2f
+
+  // Blue - red
+  {128, 128, 255},  // 0x30
+  {159, 128, 255},  // 0x31
+  {191, 128, 255},  // 0x32
+  {207, 128, 255},  // 0x33
+  {255, 128, 255},  // 0x34
+  {255, 128, 207},  // 0x35
+  {255, 128, 191},  // 0x36
+  {255, 128, 159},  // 0x37
+
+  {64, 0, 0},       // 0x38
+  {64, 64, 0},      // 0x39
+  {0, 64, 0},       // 0x3a
+  {0, 64, 64},      // 0x3b
+  {0, 0, 64},       // 0x3c
+  {64, 0, 64},      // 0x3d
 };
 
 void unpackHue(uint16_t hue, uint8_t *r, uint8_t *g, uint8_t *b) {
@@ -270,27 +307,31 @@ void DualMode::updateAcc(float fxg, float fyg, float fzg) {
 
   switch (acc_mode) {
     case A_SPEED:
-      maxg = (max(max(abs(fxg), abs(fyg)), abs(fzg)) * 0.05) + (maxg * 0.95);
+      maxg = max(max(abs(fxg), abs(fyg)), abs(fzg));
+      if (acc_counter < 0) acc_counter = 0;
       if (cur_variant == 0) {
-        if (maxg > 1.45) {
+        if (maxg > 1.5) {
+          acc_counter += 3;
+        } else if (maxg > 1.35) {
           acc_counter++;
         } else {
           acc_counter--;
         }
-        if (acc_counter < 0) acc_counter = 0;
         if (acc_counter > 100) {
           cur_variant = 1;
         }
       } else {
-        if (maxg > 1.1) {
+        if (maxg > 1.35) {
+          acc_counter += 3;
+        } else if (maxg > 1.1) {
           acc_counter++;
         } else {
           acc_counter--;
         }
         if (acc_counter <= 0) {
           cur_variant = 0;
-        } else if (acc_counter > 200) {
-          acc_counter = 200;
+        } else if (acc_counter > 125) {
+          acc_counter = 125;
         }
       }
       break;
@@ -324,7 +365,7 @@ void DualMode::updateAcc(float fxg, float fyg, float fzg) {
 }
 
 
-void TriMode::render(uint8_t *r, uint8_t *g, uint8_t *b) {
+void TriTilt::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   // Render using the cur_variant and increment the tick of the other anim to
   // keep them in sync.
   uint8_t rr, gg, bb;
@@ -335,7 +376,7 @@ void TriMode::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   prime[2]->incTick();
 }
 
-void TriMode::reset() {
+void TriTilt::reset() {
   tick = 0;
   cur_variant = 0;
   prime[0]->reset();
@@ -343,7 +384,7 @@ void TriMode::reset() {
   prime[2]->reset();
 }
 
-void TriMode::updateAcc(float fxg, float fyg, float fzg) {
+void TriTilt::updateAcc(float fxg, float fyg, float fzg) {
   // Values come in 0-63 and get translated to -32-31
   float pitch;
 
@@ -423,7 +464,7 @@ void TiltMorph::reset() {
 }
 
 
-void Speeder::render(uint8_t *r, uint8_t *g, uint8_t *b) {
+void TriSpeed::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   // Render using the cur_variant and increment the tick of the other anim to
   // keep them in sync.
   uint8_t rr, gg, bb;
@@ -434,7 +475,7 @@ void Speeder::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   prime[2]->incTick();
 }
 
-void Speeder::reset() {
+void TriSpeed::reset() {
   tick = 0;
   cur_variant = 0;
   maxg = 0;
@@ -443,7 +484,7 @@ void Speeder::reset() {
   prime[2]->reset();
 }
 
-void Speeder::updateAcc(float fxg, float fyg, float fzg) {
+void TriSpeed::updateAcc(float fxg, float fyg, float fzg) {
   float pitch;
   uint8_t level;
   maxg = max(max(abs(fxg), abs(fyg)), abs(fzg));
