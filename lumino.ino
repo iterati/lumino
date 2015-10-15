@@ -243,8 +243,8 @@ void setupModes() {
   prime71.palette[6] = 0x00;
   prime71.palette[7] = 0x00;
 
-  mode7.prime = &prime70;
-  mode7.prime = &prime71;
+  mode7.prime[0] = &prime70;
+  mode7.prime[1] = &prime71;
 
   // DO NOT EDIT THIS FOR LOOP
   for (uint8_t i = 0; i < NUM_MODES; i++) {
