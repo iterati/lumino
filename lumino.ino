@@ -20,84 +20,45 @@
 uint16_t mode_addrs[NUM_MODES];
 
 // DEFINE MODES AND PRIMES HERE. Palettes go in setupModes()
-// Mode0
-// TiltMorph takes one argument, alpha. A lower value makes the color a
-// bit steadier. TiltMorph requires no further configuration.
 TiltMorph mode0 = TiltMorph(0.05);
 
 // Mode1
-// TriSpeed takes one argument, alpha. A higher value tracks faster and
-// is recommended. TriSpeed requires 3 primes.
 TriSpeed mode1 = TriSpeed(0.9);
-
-// RainbowPrime takes 5 arguments.
-// The first two define the strobe.
-// Color time is the number of ms the color shows for.
-// Blank time is the number of ms a blank is shown.
-// Splits is the number of different colors are shown while strobing.
-// Split distance is the number of hue steps (out of 1536) to move between splits.
-// Speed is the number of ms it takes before the hue moves 1 step on it's own.
 RainbowPrime prime10 = RainbowPrime(3,  23, 2, 256,   2);
 RainbowPrime prime11 = RainbowPrime(5,  8,  3, 128, 2);
 RainbowPrime prime12 = RainbowPrime(17, 17, 5, 64,  2);
 
 // Mode2
-// TriTilt takes an axis and an alpha value. In this case, the X axis.
-// TriTilt requires 3 primes.
-TriTilt mode2 = TriTilt(A_TILTX, 0.05);
-
-// TracerPrime takes color time and tracer time. Tracer time is like blank time
-// but shows the first color in the palette instead of blank.
-TracerPrime prime20 = TracerPrime(3, 23);
-TracerPrime prime21 = TracerPrime(3, 23);
-TracerPrime prime22 = TracerPrime(3, 23);
+TriSpeed mode2 = TriSpeed(0.9);
+StrobePrime prime20 = StrobePrime(3, 23);
+StrobePrime prime21 = StrobePrime(5, 8);
+StrobePrime prime22 = StrobePrime(17, 17);
 
 // Mode3
-// DualMode takes an operating mode, either speed or a tilt axis, and an alpha
-// value. DualModes require 2 primes
 DualMode mode3 = DualMode(A_SPEED, 0.75);
-
-// BlinkEPrime takes a color time and blank time. The colors are shown in order
-// for color time each and then blank time is shown.
-BlinkEPrime prime30 = BlinkEPrime(4, 30);
-
-// StrobePrime takes a color time and a blank time. The colors is shown and then
-// blank. This is as simple as it gets.
+BlinkEPrime prime30 = BlinkEPrime(3, 23);
 StrobePrime prime31 = StrobePrime(3, 23);
 
 // Mode4
-DualMode mode4 = DualMode(A_TILTX, 0.05);
-
-// ChasePrime takes the normal color time and blank time. In addition there is a
-// steps parameter. Is step were 5. Chase shows color A for color time followed
-// by blank time. Then color A is shown for 3/5 of color time, blank for 1/5 of
-// color time, and then color B, etc.
-ChasePrime prime40 = ChasePrime(50, 10, 5);
-
-// MorphPrime takes the normal color time and blank time. The colors morph from
-// A to B over color time.
-MorphPrime prime41 = MorphPrime(50, 10);
+DualMode mode4 = DualMode(A_SPEED, 0.75);
+StrobePrime prime40 = StrobePrime(5, 8);
+StrobePrime prime41 = StrobePrime(3, 23);
 
 // Mode5
-DualMode mode5 = DualMode(A_TILTY, 0.05);
-
-// FadePrime takes the normal and direction. Direction can be 0 for fade in,
-// 1 for fade out, and 2 for fade in and out.
-FadePrime prime50 = FadePrime(100, 50, 2);
-FadePrime prime51 = FadePrime(100, 50, 2);
+DualMode mode5 = DualMode(A_SPEED, 0.75);
+StrobePrime prime50 = StrobePrime(1, 10);
+StrobePrime prime51 = StrobePrime(17, 17);
 
 // Mode6
-DualMode mode6 = DualMode(A_TILTZ, 0.05);
-
-// CandyStrobePrime's two extra arguments are for how many colors to pick for the
-// stobe set and for how many iterations to show the set. 3 and 3 means that 3
-// colors are shown for 3 cycles before one color is swapped out.
-CandyStrobePrime prime60 = CandyStrobePrime(5, 8, 3, 3);
-StrobePrime prime61 = StrobePrime(5, 8);
+TriTilt mode6 = TriTilt(A_TILTY, 0.05);
+StrobePrime prime60 = StrobePrime(3, 23);
+StrobePrime prime61 = StrobePrime(3, 23);
+StrobePrime prime62 = StrobePrime(3, 23);
 
 // Mode7
-SingleMode mode7 = SingleMode();
-CandyStrobePrime prime70 = CandyStrobePrime(1, 10, 3, 10);
+DualMode mode7 = DualMode(A_TILTY, 0.05);
+FadePrime prime70 = FadePrime(100, 50, 2);
+FadePrime prime71 = FadePrime(100, 50, 2);
 
 // MAKE SURE ALL MODES ARE IN HERE AND THERE ARE AT LEAST NUM_MODES (default is 8) ENTRIES
 // THIS STORES A POINTER TO EACH OF YOUR MODES SO THEY CAN BE USED IN BUNDLES
@@ -114,65 +75,49 @@ Mode *modes[NUM_MODES] = {
 
 // SETUP MODES HERE
 void setupModes() {
-  // Mode0
-  // TiltMorph has no setup
-
   // Mode1
-  // RainbowPrimes don't have palettes
   mode1.prime[0] = &prime10;
   mode1.prime[1] = &prime11;
   mode1.prime[2] = &prime12;
 
   // Mode2
-  // We're using 8 color palettes at 1 shade dimmer than full bright
-  // Colors are defined in modes.cpp near the top. I'm using hex values
-  // because all colors are in meta groups of 8 and represent the transition
-  // from one primary RGB color to another. The palette can be customized by
-  // editing the RGB values of each array entry you wish to edit.
-  // Shades are also in hex values to show which level they are at. 0x00
-  // (0, the same as nothing) is full bright. 0x40 is 1 shade below followed
-  // by 0x80 and 0xc0 for the dimmest shade.
-  // If you want to use less than 8 colors you don't have to define every
-  // color, but it can be useful for quickly editing in the future.
   prime20.num_colors = 8;
-  prime20.palette[0] = 0x39 + 0xc0;
-  prime20.palette[1] = 0x08 + 0x40;
-  prime20.palette[2] = 0x0b + 0x40;
-  prime20.palette[3] = 0x0f + 0x40;
-  prime20.palette[4] = 0x12 + 0x40;
-  prime20.palette[5] = 0x16 + 0x40;
-  prime20.palette[6] = 0x19 + 0x40;
+  prime20.palette[0] = 0x08 + 0x40;
+  prime20.palette[1] = 0x0b + 0x40;
+  prime20.palette[2] = 0x0e + 0x40;
+  prime20.palette[3] = 0x11 + 0x40;
+  prime20.palette[4] = 0x14 + 0x40;
+  prime20.palette[5] = 0x17 + 0x40;
+  prime20.palette[6] = 0x1a + 0x40;
   prime20.palette[7] = 0x1d + 0x40;
 
   prime21.num_colors = 8;
-  prime21.palette[0] = 0x3b + 0xc0;
-  prime21.palette[1] = 0x08 + 0x40;
-  prime21.palette[2] = 0x0b + 0x40;
-  prime21.palette[3] = 0x0f + 0x40;
-  prime21.palette[4] = 0x12 + 0x40;
-  prime21.palette[5] = 0x16 + 0x40;
-  prime21.palette[6] = 0x19 + 0x40;
+  prime21.palette[0] = 0x08 + 0x40;
+  prime21.palette[1] = 0x0b + 0x40;
+  prime21.palette[2] = 0x0e + 0x40;
+  prime21.palette[3] = 0x11 + 0x40;
+  prime21.palette[4] = 0x14 + 0x40;
+  prime21.palette[5] = 0x17 + 0x40;
+  prime21.palette[6] = 0x1a + 0x40;
   prime21.palette[7] = 0x1d + 0x40;
 
   prime22.num_colors = 8;
-  prime22.palette[0] = 0x3d + 0xc0;
-  prime22.palette[1] = 0x08 + 0x40;
-  prime22.palette[2] = 0x0b + 0x40;
-  prime22.palette[3] = 0x0f + 0x40;
-  prime22.palette[4] = 0x12 + 0x40;
-  prime22.palette[5] = 0x16 + 0x40;
-  prime22.palette[6] = 0x19 + 0x40;
+  prime22.palette[0] = 0x08 + 0x40;
+  prime22.palette[1] = 0x0b + 0x40;
+  prime22.palette[2] = 0x0e + 0x40;
+  prime22.palette[3] = 0x11 + 0x40;
+  prime22.palette[4] = 0x14 + 0x40;
+  prime22.palette[5] = 0x17 + 0x40;
+  prime22.palette[6] = 0x1a + 0x40;
   prime22.palette[7] = 0x1d + 0x40;
 
-  // Primes must be attached to their modes in this function. Here I am
-  // setting each of the three primes to their slots on the mode.
   mode2.prime[0] = &prime20;
   mode2.prime[1] = &prime21;
   mode2.prime[2] = &prime22;
 
   // Mode3
   prime30.num_colors = 7;
-  prime30.palette[0] = 0x06;
+  prime30.palette[0] = 0x06 + 0x40;
   prime30.palette[1] = 0x3e + 0xc0;
   prime30.palette[2] = 0x3d + 0xc0;
   prime30.palette[3] = 0x3c + 0xc0;
@@ -182,101 +127,124 @@ void setupModes() {
   prime30.palette[7] = 0x00;
 
   prime31.num_colors = 8;
-  prime31.palette[0] = 0x08 + 0x80;
-  prime31.palette[1] = 0x0b + 0x80;
-  prime31.palette[2] = 0x0e + 0x80;
-  prime31.palette[3] = 0x11 + 0x80;
-  prime31.palette[4] = 0x15 + 0x80;
-  prime31.palette[5] = 0x18 + 0x80;
-  prime31.palette[6] = 0x1a + 0x80;
-  prime31.palette[7] = 0x1d + 0x80;
+  prime31.palette[0] = 0x08 + 0x40;
+  prime31.palette[1] = 0x0b + 0x40;
+  prime31.palette[2] = 0x0e + 0x40;
+  prime31.palette[3] = 0x11 + 0x40;
+  prime31.palette[4] = 0x14 + 0x40;
+  prime31.palette[5] = 0x17 + 0x40;
+  prime31.palette[6] = 0x1a + 0x40;
+  prime31.palette[7] = 0x1d + 0x40;
 
   mode3.prime[0] = &prime30;
   mode3.prime[1] = &prime31;
 
   // Mode4
-  prime40.num_colors = 8;
-  prime40.palette[0] = 0x08;
-  prime40.palette[1] = 0x11;
-  prime40.palette[2] = 0x1a;
-  prime40.palette[3] = 0x0e;
-  prime40.palette[4] = 0x0b;
-  prime40.palette[5] = 0x17;
-  prime40.palette[6] = 0x14;
-  prime40.palette[7] = 0x1d;
+  prime40.num_colors = 5;
+  prime40.palette[0] = 0x08 + 0x40;
+  prime40.palette[1] = 0x00;
+  prime40.palette[2] = 0x11 + 0x40;
+  prime40.palette[3] = 0x1a + 0x40;
+  prime40.palette[4] = 0x00;
+  prime40.palette[5] = 0x00;
+  prime40.palette[6] = 0x00;
+  prime40.palette[7] = 0x00;
 
-  prime41.num_colors = 8;
-  prime41.palette[0] = 0x08;
-  prime41.palette[1] = 0x11;
-  prime41.palette[2] = 0x1a;
-  prime41.palette[3] = 0x0e;
-  prime41.palette[4] = 0x0b;
-  prime41.palette[5] = 0x17;
-  prime41.palette[6] = 0x14;
-  prime41.palette[7] = 0x1d;
+  prime41.num_colors = 7;
+  prime41.palette[0] = 0x16 + 0x40;
+  prime41.palette[1] = 0x08 + 0xc0;
+  prime41.palette[2] = 0x1a + 0x40;
+  prime41.palette[3] = 0x08 + 0xc0;
+  prime41.palette[4] = 0x0f + 0x40;
+  prime41.palette[5] = 0x08 + 0xc0;
+  prime41.palette[6] = 0x00;
+  prime41.palette[7] = 0x00;
 
   mode4.prime[0] = &prime40;
   mode4.prime[1] = &prime41;
 
   // Mode5
-  prime50.num_colors = 3;
-  prime50.palette[0] = 0x1f;
-  prime50.palette[1] = 0x17;
-  prime50.palette[2] = 0x0f;
-  prime50.palette[3] = 0x00;
-  prime50.palette[4] = 0x00;
-  prime50.palette[5] = 0x00;
-  prime50.palette[6] = 0x00;
-  prime50.palette[7] = 0x00;
+  prime50.num_colors = 8;
+  prime50.palette[0] = 0x08 + 0x40;
+  prime50.palette[1] = 0x0b + 0x40;
+  prime50.palette[2] = 0x0e + 0x40;
+  prime50.palette[3] = 0x11 + 0x40;
+  prime50.palette[4] = 0x14 + 0x40;
+  prime50.palette[5] = 0x17 + 0x40;
+  prime50.palette[6] = 0x1a + 0x40;
+  prime50.palette[7] = 0x1d + 0x40;
 
-  prime51.num_colors = 3;
-  prime51.palette[0] = 0x1b;
-  prime51.palette[1] = 0x13;
-  prime51.palette[2] = 0x0b;
-  prime51.palette[3] = 0x00;
-  prime51.palette[4] = 0x00;
-  prime51.palette[5] = 0x00;
-  prime51.palette[6] = 0x00;
-  prime51.palette[7] = 0x00;
+  prime51.num_colors = 8;
+  prime51.palette[0] = 0x08 + 0x40;
+  prime51.palette[1] = 0x0b + 0x40;
+  prime51.palette[2] = 0x0e + 0x40;
+  prime51.palette[3] = 0x11 + 0x40;
+  prime51.palette[4] = 0x14 + 0x40;
+  prime51.palette[5] = 0x17 + 0x40;
+  prime51.palette[6] = 0x1a + 0x40;
+  prime51.palette[7] = 0x1d + 0x40;
 
   mode5.prime[0] = &prime50;
   mode5.prime[1] = &prime51;
 
   // Mode6
   prime60.num_colors = 8;
-  prime60.palette[0] = 0x08;
-  prime60.palette[1] = 0x0b;
-  prime60.palette[2] = 0x0e;
-  prime60.palette[3] = 0x11;
-  prime60.palette[4] = 0x14;
-  prime60.palette[5] = 0x17;
-  prime60.palette[6] = 0x1a;
-  prime60.palette[7] = 0x1d;
+  prime60.palette[0] = 0x08 + 0x40;
+  prime60.palette[1] = 0x09 + 0x40;
+  prime60.palette[2] = 0x0a + 0x40;
+  prime60.palette[3] = 0x0b + 0x40;
+  prime60.palette[4] = 0x0c + 0x40;
+  prime60.palette[5] = 0x0d + 0x40;
+  prime60.palette[6] = 0x0e + 0x40;
+  prime60.palette[7] = 0x0f + 0x40;
 
   prime61.num_colors = 8;
-  prime61.palette[0] = 0x08;
-  prime61.palette[1] = 0x0b;
-  prime61.palette[2] = 0x0e;
-  prime61.palette[3] = 0x11;
-  prime61.palette[4] = 0x14;
-  prime61.palette[5] = 0x17;
-  prime61.palette[6] = 0x1a;
-  prime61.palette[7] = 0x1d;
+  prime61.palette[0] = 0x10 + 0x40;
+  prime61.palette[1] = 0x11 + 0x40;
+  prime61.palette[2] = 0x12 + 0x40;
+  prime61.palette[3] = 0x13 + 0x40;
+  prime61.palette[4] = 0x14 + 0x40;
+  prime61.palette[5] = 0x15 + 0x40;
+  prime61.palette[6] = 0x16 + 0x40;
+  prime61.palette[7] = 0x17 + 0x40;
+
+  prime62.num_colors = 8;
+  prime62.palette[0] = 0x18 + 0x40;
+  prime62.palette[1] = 0x19 + 0x40;
+  prime62.palette[2] = 0x1a + 0x40;
+  prime62.palette[3] = 0x1b + 0x40;
+  prime62.palette[4] = 0x1c + 0x40;
+  prime62.palette[5] = 0x1d + 0x40;
+  prime62.palette[6] = 0x1e + 0x40;
+  prime62.palette[7] = 0x1f + 0x40;
 
   mode6.prime[0] = &prime60;
   mode6.prime[1] = &prime61;
+  mode6.prime[2] = &prime62;
 
   // Mode7
   prime70.num_colors = 8;
-  prime70.palette[0] = 0x08;
-  prime70.palette[1] = 0x11;
-  prime70.palette[2] = 0x1a;
-  prime70.palette[3] = 0x0e;
-  prime70.palette[4] = 0x17;
-  prime70.palette[5] = 0x0b;
-  prime70.palette[6] = 0x14;
-  prime70.palette[7] = 0x1d;
+  prime70.palette[0] = 0x16;
+  prime70.palette[1] = 0x00;
+  prime70.palette[2] = 0x00;
+  prime70.palette[3] = 0x00;
+  prime70.palette[4] = 0x00;
+  prime70.palette[5] = 0x00;
+  prime70.palette[6] = 0x00;
+  prime70.palette[7] = 0x00;
+
+  prime71.num_colors = 1;
+  prime71.palette[0] = 0x1f;
+  prime71.palette[1] = 0x00;
+  prime71.palette[2] = 0x00;
+  prime71.palette[3] = 0x00;
+  prime71.palette[4] = 0x00;
+  prime71.palette[5] = 0x00;
+  prime71.palette[6] = 0x00;
+  prime71.palette[7] = 0x00;
+
   mode7.prime = &prime70;
+  mode7.prime = &prime71;
 
   // DO NOT EDIT THIS FOR LOOP
   for (uint8_t i = 0; i < NUM_MODES; i++) {
@@ -298,7 +266,7 @@ void loadModes() {
 }
 
 // Change this to a value between 1 and 255 to upload new settings to the EEPROM
-uint8_t current_version = 2;
+uint8_t current_version = 42;
 
 // ********************************************************************
 // **** END OF MODE CUSTOMIZATION BLOCK. DO NOT EDIT UNDER HERE *******
