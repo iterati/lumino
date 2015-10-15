@@ -3,7 +3,7 @@
 Lumino is an open and straightforward framework for the Open Source Microlight. The goal of this framework is to be flexible enough to allow for modes of differing structure. Live configuration of modes is not planned, so some familiarity with the code is required. The code is structured in such a way that configuration is simple enough for newbies and experienced developers alike.
 
 Current Features:
-* 8 Operating Modes
+* 9 Operating Modes
   * Single Mode - No accelerometer switching.
   * Dual Mode Speed - Motion switches between two primes.
   * Tri Mode Speed - Slow / medium / fast switching between primes.
