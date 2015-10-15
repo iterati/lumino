@@ -47,17 +47,17 @@ This is the default mode to be in. You start here and exit to here when done edi
 
 **Play controls**
 * single press - Go to next mode. Toggles light if in conjuring mode.
-* hold for 1s to 3s - Turn off light.
-* hold for 3s to 5s - Toggles conjuring mode.
-* hold for 5s+ - Enter Palette Select mode.
+* hold for 1s to 3s - Flashes white. Turn off light.
+* hold for 3s to 5s - Flashes blue. Toggles conjuring mode.
+* hold for 5s+ - Flashes orange. Enter Palette Select mode.
 
 ## Palette Select
-This is where you chose which palette to configure. For SingleMode, just blinks yellow for it's one configurable palette. For DualMode, blinks either cyan or magenta for which palette you are on. For Tri- modes, blinks red, green, or blue for the three palettes. TiltMorph just glows red as does any prime that doesn't have a palette (e.g. RainbowPrime).
+This is where you chose which palette to configure. For SingleMode, just blinks orange for it's one configurable palette. For DualMode, blinks either yellow or green for which palette you are on. For Tri- modes, blinks cyan, blue, or magenta for the three palettes. TiltMorph just glows red as does any prime that doesn't have a palette (e.g. RainbowPrime).
 
 **Palette Select controls**
 * single press - Go to next palette. Does nothing on Single Mode.
-* hold for 1s to 3s - Enter Color Select mode for first color of selected palette.
-* hold for 3s+ - Exits to Play mode.
+* hold for 1s to 3s - Flashes orange. Enter Color Select mode for first color of selected palette.
+* hold for 3s+ - Flashes white. Exits to Play mode.
 
 ## Color Select
 This is where you chose your color. You have a chance to preview and confirm or reject the color after selecting it.
@@ -65,15 +65,15 @@ This is where you chose your color. You have a chance to preview and confirm or 
 **Color Select controls**
 * single press - Go to next color index.
 * double press - Go to previous color index.
-* hold - Every 1s the shade increments until released. When released, the color is selected and and goes to Color Confirm mode.
+* hold - Flashes white every shade change. Every 1s the shade increments until released. When released, the color is selected and and goes to Color Confirm mode.
 
 ## Color Confirm
 This is where you confirm the color you just picked by watching a preview of the mode play. You can accept the color, reject the color, or accept color and finish editing. At this point, num_colors will be set on the Prime.
 
 **Color Confirm controls**
 * single press - Accepts color and moves to the next color in the palette. If on the last color, saves the current palette and returns to Palette Select mode.
-* hold for 1-3s - Rejects color and move back to previous color. Goes to Color Confirm on previous color. If on the first color, goes directly to Color Select mode.
-* hold for 3s+ - Accepts color and finish editing. Saves the current palette and returns to Palette Select mode.
+* hold for 1-3s - Flashes red. Rejects color and move back to previous color. Goes to Color Confirm on previous color. If on the first color, goes directly to Color Select mode.
+* hold for 3s+ - Flashes white. Accepts color and finish editing. Saves the current palette and returns to Palette Select mode.
 
 
 # Default Modes and Customization
