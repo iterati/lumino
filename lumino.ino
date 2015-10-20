@@ -18,7 +18,7 @@
 // ********************************************************************
 // This number is the maximum number of modes you can have at once.
 // There MUST be this many modes.
-#define NUM_MODES 8
+#define NUM_MODES 12
 uint16_t mode_addrs[NUM_MODES];
 
 // DEFINE MODES AND PRIMES HERE. Palettes go in setupModes()
@@ -38,7 +38,7 @@ CandyStrobePrime prime22 = CandyStrobePrime(3,  10,  3, 40);
 
 // Mode3
 DualMode mode3 = DualMode(A_SPEED, 0.75);
-BlinkEPrime prime30 = BlinkEPrime(5, 69); // 52 = (x * 7) + y
+BlinkEPrime prime30 = BlinkEPrime(5, 69);
 StrobePrime prime31 = StrobePrime(3, 23);
 
 // Mode4
@@ -57,9 +57,32 @@ StrobePrime prime60 = StrobePrime(3, 23);
 TracerPrime prime61 = TracerPrime(7, 19);
 
 // Mode7
-DualMode mode7 = DualMode(A_TILTZ, 0.05);
+DualMode mode7 = DualMode(A_FLIPZ, 0.05);
 FadePrime prime70 = FadePrime(100, 50, 2);
 FadePrime prime71 = FadePrime(100, 50, 2);
+
+// Mode8
+TriTilt mode8 = TriTilt(A_TILTX, 0.05);
+StrobePrime prime80 = StrobePrime(5, 8);
+StrobePrime prime81 = StrobePrime(5, 8);
+StrobePrime prime82 = StrobePrime(5, 8);
+
+// Mode9
+TriTilt mode9 = TriTilt(A_TILTY, 0.05);
+StrobePrime prime90 = StrobePrime(5, 8);
+StrobePrime prime91 = StrobePrime(5, 8);
+StrobePrime prime92 = StrobePrime(5, 8);
+
+// Mode10
+DualMode mode10 = DualMode(A_TILTX, 0.05);
+StrobePrime prime100 = StrobePrime(5, 8);
+StrobePrime prime101 = StrobePrime(5, 8);
+
+// Mode11
+DualMode mode11 = DualMode(A_TILTY, 0.05);
+StrobePrime prime110 = StrobePrime(5, 8);
+StrobePrime prime111 = StrobePrime(5, 8);
+
 
 // MAKE SURE ALL MODES ARE IN HERE AND THERE ARE AT LEAST NUM_MODES (default is 8) ENTRIES
 // THIS STORES A POINTER TO EACH OF YOUR MODES SO THEY CAN BE USED IN BUNDLES
@@ -72,15 +95,19 @@ Mode *modes[NUM_MODES] = {
   &mode5,
   &mode6,
   &mode7,
+  &mode8,
+  &mode9,
+  &mode10,
+  &mode11,
 };
 
 #define NUM_BUNDLES 2
+int8_t bundles[NUM_BUNDLES][NUM_MODES] = {
+  { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11},
+  { 3,  5,  6,  2, -1, -1, -1, -1, -1, -1, -1, -1},
+};
 uint8_t cur_bundle = 0;
 uint8_t bundle_idx = 0;
-int8_t bundles[NUM_BUNDLES][NUM_MODES] = {
-  {0, 1, 2, 3, 4, 5, 6, 7},
-  {3, 5, 6, 2, -1, -1, -1, -1},
-};
 
 
 // SETUP MODES HERE
@@ -245,6 +272,125 @@ void setupModes() {
   mode7.prime[0] = &prime70;
   mode7.prime[1] = &prime71;
 
+  // Mode8
+  prime80.num_colors = 8;
+  prime80.palette[0] = 0x08 + 0x40;
+  prime80.palette[1] = 0x09 + 0x40;
+  prime80.palette[2] = 0x0a + 0x40;
+  prime80.palette[3] = 0x0b + 0x40;
+  prime80.palette[4] = 0x0c + 0x40;
+  prime80.palette[5] = 0x0d + 0x40;
+  prime80.palette[6] = 0x0e + 0x40;
+  prime80.palette[7] = 0x0f + 0x40;
+
+  prime81.num_colors = 8;
+  prime81.palette[0] = 0x10 + 0x40;
+  prime81.palette[1] = 0x11 + 0x40;
+  prime81.palette[2] = 0x12 + 0x40;
+  prime81.palette[3] = 0x13 + 0x40;
+  prime81.palette[4] = 0x14 + 0x40;
+  prime81.palette[5] = 0x15 + 0x40;
+  prime81.palette[6] = 0x16 + 0x40;
+  prime81.palette[7] = 0x17 + 0x40;
+
+  prime82.num_colors = 8;
+  prime82.palette[0] = 0x18 + 0x40;
+  prime82.palette[1] = 0x19 + 0x40;
+  prime82.palette[2] = 0x1a + 0x40;
+  prime82.palette[3] = 0x1b + 0x40;
+  prime82.palette[4] = 0x1c + 0x40;
+  prime82.palette[5] = 0x1d + 0x40;
+  prime82.palette[6] = 0x1e + 0x40;
+  prime82.palette[7] = 0x1f + 0x40;
+
+  mode8.prime[0] = &prime80;
+  mode8.prime[1] = &prime81;
+  mode8.prime[2] = &prime82;
+
+  // Mode9
+  prime90.num_colors = 8;
+  prime90.palette[0] = 0x08 + 0x40;
+  prime90.palette[1] = 0x09 + 0x40;
+  prime90.palette[2] = 0x0a + 0x40;
+  prime90.palette[3] = 0x0b + 0x40;
+  prime90.palette[4] = 0x0c + 0x40;
+  prime90.palette[5] = 0x0d + 0x40;
+  prime90.palette[6] = 0x0e + 0x40;
+  prime90.palette[7] = 0x0f + 0x40;
+
+  prime91.num_colors = 8;
+  prime91.palette[0] = 0x10 + 0x40;
+  prime91.palette[1] = 0x11 + 0x40;
+  prime91.palette[2] = 0x12 + 0x40;
+  prime91.palette[3] = 0x13 + 0x40;
+  prime91.palette[4] = 0x14 + 0x40;
+  prime91.palette[5] = 0x15 + 0x40;
+  prime91.palette[6] = 0x16 + 0x40;
+  prime91.palette[7] = 0x17 + 0x40;
+
+  prime92.num_colors = 8;
+  prime92.palette[0] = 0x18 + 0x40;
+  prime92.palette[1] = 0x19 + 0x40;
+  prime92.palette[2] = 0x1a + 0x40;
+  prime92.palette[3] = 0x1b + 0x40;
+  prime92.palette[4] = 0x1c + 0x40;
+  prime92.palette[5] = 0x1d + 0x40;
+  prime92.palette[6] = 0x1e + 0x40;
+  prime92.palette[7] = 0x1f + 0x40;
+
+  mode9.prime[0] = &prime90;
+  mode9.prime[1] = &prime91;
+  mode9.prime[2] = &prime92;
+
+  // Mode10
+  prime100.num_colors = 8;
+  prime100.palette[0] = 0x08 + 0x40;
+  prime100.palette[1] = 0x09 + 0x40;
+  prime100.palette[2] = 0x0a + 0x40;
+  prime100.palette[3] = 0x0b + 0x40;
+  prime100.palette[4] = 0x0c + 0x40;
+  prime100.palette[5] = 0x0d + 0x40;
+  prime100.palette[6] = 0x0e + 0x40;
+  prime100.palette[7] = 0x0f + 0x40;
+
+  prime101.num_colors = 8;
+  prime101.palette[0] = 0x10 + 0x40;
+  prime101.palette[1] = 0x11 + 0x40;
+  prime101.palette[2] = 0x12 + 0x40;
+  prime101.palette[3] = 0x13 + 0x40;
+  prime101.palette[4] = 0x14 + 0x40;
+  prime101.palette[5] = 0x15 + 0x40;
+  prime101.palette[6] = 0x16 + 0x40;
+  prime101.palette[7] = 0x17 + 0x40;
+
+  mode10.prime[0] = &prime100;
+  mode10.prime[1] = &prime101;
+
+  // Mode11
+  prime110.num_colors = 8;
+  prime110.palette[0] = 0x08 + 0x40;
+  prime110.palette[1] = 0x09 + 0x40;
+  prime110.palette[2] = 0x0a + 0x40;
+  prime110.palette[3] = 0x0b + 0x40;
+  prime110.palette[4] = 0x0c + 0x40;
+  prime110.palette[5] = 0x0d + 0x40;
+  prime110.palette[6] = 0x0e + 0x40;
+  prime110.palette[7] = 0x0f + 0x40;
+
+  prime111.num_colors = 8;
+  prime111.palette[0] = 0x10 + 0x40;
+  prime111.palette[1] = 0x11 + 0x40;
+  prime111.palette[2] = 0x12 + 0x40;
+  prime111.palette[3] = 0x13 + 0x40;
+  prime111.palette[4] = 0x14 + 0x40;
+  prime111.palette[5] = 0x15 + 0x40;
+  prime111.palette[6] = 0x16 + 0x40;
+  prime111.palette[7] = 0x17 + 0x40;
+
+  mode11.prime[0] = &prime110;
+  mode11.prime[1] = &prime111;
+
+
   // DO NOT EDIT THIS FOR LOOP
   for (uint8_t i = 0; i < NUM_MODES; i++) {
     mode_addrs[i] = MEMORY_START + (i * MEMORY_SIZE);
@@ -265,7 +411,7 @@ void loadModes() {
 }
 
 // Change this to a value between 1 and 255 to upload new settings to the EEPROM
-uint8_t current_version = 41;
+uint8_t current_version = 42;
 
 // ********************************************************************
 // **** END OF MODE CUSTOMIZATION BLOCK. DO NOT EDIT UNDER HERE *******
@@ -301,7 +447,7 @@ void setup() {
 #endif
   power_spi_disable();
 
-  Serial.begin(57600);
+  Serial.begin(115200);
   Serial.println(F("\nWelcome to Lumino!"));
 
   // Setup pins
@@ -329,7 +475,6 @@ void setup() {
 
   // Init accelerometer
   accInit();
-
 
   // Set up fast PWM mode on timer0 and timer1
   noInterrupts();
@@ -409,8 +554,7 @@ void enterSleep() {
     }
     if (held_count > 1500) {
       cur_bundle = (cur_bundle + 1) % NUM_BUNDLES;
-      Serial.print(F("current bundle "));
-      Serial.println(cur_bundle);
+      Serial.print(F("current bundle ")); Serial.println(cur_bundle);
       flash(0, 0, 128, 5);
       held_count = 500;
     }

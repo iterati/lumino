@@ -10,7 +10,7 @@
 #define A_SPEED 0
 #define A_TILTX 1
 #define A_TILTY 2
-#define A_TILTZ 3
+#define A_FLIPZ 3
 
 void unpackHue(uint16_t hue, uint8_t *r, uint8_t *g, uint8_t *b);
 void unpackColor(uint8_t color, uint8_t *r, uint8_t *g, uint8_t *b);
@@ -163,12 +163,6 @@ class RainbowPrime : public Prime {
     uint16_t hue;
 };
 
-/*
-class GhosterPrime : public Prime {
-  public:
-    GhosterPrime(uint16_t color_time, 
-};
-*/
 
 // Modes are what we can switch between. Currently there are 2 modes, SingleMode
 // and DualMode. SingleMode uses one prime and doesn't use the accelerometer.
