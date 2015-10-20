@@ -74,6 +74,15 @@ Mode *modes[NUM_MODES] = {
   &mode7,
 };
 
+#define NUM_BUNDLES 2
+uint8_t cur_bundle = 0;
+uint8_t bundle_idx = 0;
+int8_t bundles[NUM_BUNDLES][NUM_MODES] = {
+  {0, 1, 2, 3, 4, 5, 6, 7},
+  {3, 5, 6, 2, -1, -1, -1, -1},
+};
+
+
 // SETUP MODES HERE
 void setupModes() {
   // Mode1
@@ -275,7 +284,7 @@ uint8_t current_version = 41;
 #define MMA7660_ADDRESS 0x4C
 
 uint8_t cur_mode = 0;
-Mode *mode = modes[cur_mode];
+Mode *mode = modes[bundles[cur_bundle][bundle_idx]];
 
 elapsedMicros limiter = 0;
 uint8_t accel_counter = 0;
@@ -391,14 +400,28 @@ void enterSleep() {
   sleep_cpu ();   // one cycle
 
   // Wait until button is releaed
-  while (digitalRead(PIN_BUTTON) == LOW) {}
+  uint16_t held_count = 0;
+  limiter = 0;
+  while (digitalRead(PIN_BUTTON) == LOW) {
+    if (limiter > 64000) {
+      limiter = 0;
+      held_count++;
+    }
+    if (held_count > 1500) {
+      cur_bundle = (cur_bundle + 1) % NUM_BUNDLES;
+      Serial.print(F("current bundle "));
+      Serial.println(cur_bundle);
+      flash(0, 0, 128, 5);
+      held_count = 500;
+    }
+  }
 
   // Wake up. Power on LDO before trying to access the accelerometer
   // Wait for the accelerometer to come back online before continuing
   Serial.println(F("Waking up now"));
   digitalWrite(PIN_LDO, HIGH);
   accInit();
-  setMode(0);
+  resetMode();
   conjure = conjure_toggle = false;
   delay(4000);
 }
@@ -408,9 +431,17 @@ void pushInterrupt() {
   detachInterrupt(0);
 }
 
-void setMode(uint8_t i) {
-  cur_mode = i;
-  mode = modes[cur_mode];
+void resetMode() {
+  bundle_idx = 0;
+  mode = modes[bundles[cur_bundle][bundle_idx]];
+  mode->reset();
+  fxg = fyg = fzg = 0.0;
+}
+
+void incMode() {
+  bundle_idx = (bundle_idx + 1) % NUM_MODES;
+  if (bundles[cur_bundle][bundle_idx] == -1) bundle_idx = 0;
+  mode = modes[bundles[cur_bundle][bundle_idx]];
   mode->reset();
   fxg = fyg = fzg = 0.0;
 }
@@ -533,7 +564,7 @@ void handlePress(bool pressed) {
           conjure_toggle = !conjure_toggle;
         } else {
           Serial.print(F("changing to mode ")); Serial.println(((cur_mode + 1) % NUM_MODES) + 1);
-          setMode((cur_mode + 1) % NUM_MODES);
+          incMode();
         }
         button_state = S_PLAY_OFF;
       } else if (since_press > 1000) {
