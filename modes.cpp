@@ -49,34 +49,34 @@ const PROGMEM uint8_t color_palette[64][3] = {
   {255, 0, 63},     // 0x1f
 
   // Red - green saturated
-  {255, 128, 128},  // 0x20
-  {255, 159, 128},  // 0x21
-  {255, 191, 128},  // 0x22
-  {255, 207, 128},  // 0x23
-  {255, 255, 128},  // 0x24
-  {207, 255, 128},  // 0x25
-  {191, 255, 128},  // 0x26
-  {159, 255, 128},  // 0x27
+  {255, 64,  64},  // 0x20
+  {255, 112, 64},  // 0x21
+  {255, 160, 64},  // 0x22
+  {255, 208, 64},  // 0x23
+  {255, 255, 64},  // 0x24
+  {208, 255, 64},  // 0x25
+  {160, 255, 64},  // 0x26
+  {112, 255, 64},  // 0x27
 
   // Green - blue saturated
-  {128, 255, 128},  // 0x28
-  {128, 255, 159},  // 0x29
-  {128, 255, 191},  // 0x2a
-  {128, 255, 207},  // 0x2b
-  {128, 255, 255},  // 0x2c
-  {128, 207, 255},  // 0x2d
-  {128, 191, 255},  // 0x2e
-  {128, 159, 255},  // 0x2f
+  {64, 255, 64},  // 0x28
+  {64, 255, 112},  // 0x29
+  {64, 255, 160},  // 0x2a
+  {64, 255, 208},  // 0x2b
+  {64, 255, 255},  // 0x2c
+  {64, 208, 255},  // 0x2d
+  {64, 160, 255},  // 0x2e
+  {64, 112, 255},  // 0x2f
 
   // Blue - red saturated
-  {128, 128, 255},  // 0x30
-  {159, 128, 255},  // 0x31
-  {191, 128, 255},  // 0x32
-  {207, 128, 255},  // 0x33
-  {255, 128, 255},  // 0x34
-  {255, 128, 207},  // 0x35
-  {255, 128, 191},  // 0x36
-  {255, 128, 159},  // 0x37
+  {64,  64, 255},  // 0x30
+  {112, 64, 255},  // 0x31
+  {160, 64, 255},  // 0x32
+  {208, 64, 255},  // 0x33
+  {255, 64, 255},  // 0x34
+  {255, 64, 208},  // 0x35
+  {255, 64, 160},  // 0x36
+  {255, 64, 112},  // 0x37
 
   // Dim colors
   {32, 32, 32},     // 0x38
@@ -542,7 +542,7 @@ void DualMode::updateAcc(float fxg, float fyg, float fzg) {
       break;
 
     case A_TILTX:
-      roll = (atan2(-fxg, fzg) * 180.0) / M_PI;
+      roll = (atan2(fxg, fzg) * 180.0) / M_PI;
       if (cur_variant == 0) {
         cur_variant = roll < -75;
       } else {
@@ -551,7 +551,7 @@ void DualMode::updateAcc(float fxg, float fyg, float fzg) {
       break;
 
     case A_TILTY:
-      roll = (atan2(-fyg, fzg) * 180.0) / M_PI;
+      roll = (atan2(fyg, fzg) * 180.0) / M_PI;
       if (cur_variant == 0) {
         cur_variant = roll < -75;
       } else {
@@ -741,12 +741,14 @@ void TriSpeed::updateAcc(float fxg, float fyg, float fzg) {
   } else {
     /* acc_counter--; */
   }
+
   if (acc_counter < 0) acc_counter = 0;
+
   if (cur_variant == 0) {
     if (acc_counter > 250) {
       cur_variant = 1;
     }
-    acc_counter--;
+    acc_counter -= 1;
   } else if (cur_variant == 1) {
     if (acc_counter <= 0) {
       cur_variant = 0;

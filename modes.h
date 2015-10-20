@@ -149,7 +149,7 @@ class ChasePrime : public Prime {
 
 class RainbowPrime : public Prime {
   public:
-    RainbowPrime(uint16_t color_time, uint8_t blank_time, uint16_t splits, uint16_t split_dist, uint16_t speed) :
+    RainbowPrime(uint16_t color_time, uint16_t blank_time, uint16_t splits, uint16_t split_dist, uint16_t speed) :
       Prime(), color_time(color_time), blank_time(blank_time), splits(splits), split_dist(split_dist), speed(speed) {}
 
     void render(uint8_t *r, uint8_t *g, uint8_t *b);
@@ -162,6 +162,13 @@ class RainbowPrime : public Prime {
     uint16_t split, hue_tick;
     uint16_t hue;
 };
+
+/*
+class GhosterPrime : public Prime {
+  public:
+    GhosterPrime(uint16_t color_time, 
+};
+*/
 
 // Modes are what we can switch between. Currently there are 2 modes, SingleMode
 // and DualMode. SingleMode uses one prime and doesn't use the accelerometer.

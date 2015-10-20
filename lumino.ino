@@ -8,6 +8,8 @@
 #include <avr/power.h>
 #include "elapsedMillis.h"
 #include "modes.h"
+
+// #define DEBUG
 // ********************************************************************
 
 
@@ -24,35 +26,35 @@ TiltMorph mode0 = TiltMorph(0.05);
 
 // Mode1
 TriSpeed mode1 = TriSpeed(0.9);
-RainbowPrime prime10 = RainbowPrime(3,  23, 2, 512, 52);
-RainbowPrime prime11 = RainbowPrime(5,  8,  3, 256, 52);
-RainbowPrime prime12 = RainbowPrime(17, 17, 5, 128, 52);
+RainbowPrime prime10 = RainbowPrime(3,  36,   2, 512, 52);
+RainbowPrime prime11 = RainbowPrime(3,  23,   3, 256, 52);
+RainbowPrime prime12 = RainbowPrime(3,  10,   5, 128, 52);
 
 // Mode2
 TriSpeed mode2 = TriSpeed(0.9);
-CandyStrobePrime prime20 = CandyStrobePrime(3,  23, 3, 10);
-CandyStrobePrime prime21 = CandyStrobePrime(5,  8,  3, 20);
-CandyStrobePrime prime22 = CandyStrobePrime(13, 13, 3, 10);
+CandyStrobePrime prime20 = CandyStrobePrime(3,  49,  3, 10);
+CandyStrobePrime prime21 = CandyStrobePrime(3,  23,  3, 20);
+CandyStrobePrime prime22 = CandyStrobePrime(3,  10,  3, 40);
 
 // Mode3
 DualMode mode3 = DualMode(A_SPEED, 0.75);
-BlinkEPrime prime30 = BlinkEPrime(3, 23);
+BlinkEPrime prime30 = BlinkEPrime(5, 69); // 52 = (x * 7) + y
 StrobePrime prime31 = StrobePrime(3, 23);
 
 // Mode4
 DualMode mode4 = DualMode(A_SPEED, 0.9);
-StrobePrime prime40 = StrobePrime(17, 17);
-StrobePrime prime41 = StrobePrime(5, 8);
+FadePrime prime40 = FadePrime(6, 20, 1);
+StrobePrime prime41 = StrobePrime(0, 100);
 
 // Mode5
 DualMode mode5 = DualMode(A_SPEED, 0.75);
-StrobePrime prime50 = StrobePrime(5, 8);
+StrobePrime prime50 = StrobePrime(3, 10);
 StrobePrime prime51 = StrobePrime(3, 23);
 
 // Mode6
 DualMode mode6 = DualMode(A_SPEED, 0.75);
 StrobePrime prime60 = StrobePrime(3, 23);
-StrobePrime prime61 = StrobePrime(5, 8);
+TracerPrime prime61 = TracerPrime(7, 19);
 
 // Mode7
 DualMode mode7 = DualMode(A_TILTZ, 0.05);
@@ -83,32 +85,32 @@ void setupModes() {
   prime20.num_colors = 8;
   prime20.palette[0] = 0x08 + 0x40;
   prime20.palette[1] = 0x0b + 0x40;
-  prime20.palette[2] = 0x0e + 0x40;
-  prime20.palette[3] = 0x11 + 0x40;
-  prime20.palette[4] = 0x14 + 0x40;
-  prime20.palette[5] = 0x17 + 0x40;
-  prime20.palette[6] = 0x1a + 0x40;
-  prime20.palette[7] = 0x1d + 0x40;
+  prime20.palette[7] = 0x0e + 0x40;
+  prime20.palette[2] = 0x11 + 0x40;
+  prime20.palette[6] = 0x14 + 0x40;
+  prime20.palette[3] = 0x17 + 0x40;
+  prime20.palette[4] = 0x1a + 0x40;
+  prime20.palette[5] = 0x1d + 0x40;
 
   prime21.num_colors = 8;
   prime21.palette[0] = 0x08 + 0x40;
   prime21.palette[1] = 0x0b + 0x40;
-  prime21.palette[2] = 0x0e + 0x40;
-  prime21.palette[3] = 0x11 + 0x40;
-  prime21.palette[4] = 0x14 + 0x40;
-  prime21.palette[5] = 0x17 + 0x40;
-  prime21.palette[6] = 0x1a + 0x40;
-  prime21.palette[7] = 0x1d + 0x40;
+  prime21.palette[7] = 0x0e + 0x40;
+  prime21.palette[2] = 0x11 + 0x40;
+  prime21.palette[6] = 0x14 + 0x40;
+  prime21.palette[3] = 0x17 + 0x40;
+  prime21.palette[4] = 0x1a + 0x40;
+  prime21.palette[5] = 0x1d + 0x40;
 
   prime22.num_colors = 8;
   prime22.palette[0] = 0x08 + 0x40;
   prime22.palette[1] = 0x0b + 0x40;
-  prime22.palette[2] = 0x0e + 0x40;
-  prime22.palette[3] = 0x11 + 0x40;
-  prime22.palette[4] = 0x14 + 0x40;
-  prime22.palette[5] = 0x17 + 0x40;
-  prime22.palette[6] = 0x1a + 0x40;
-  prime22.palette[7] = 0x1d + 0x40;
+  prime22.palette[7] = 0x0e + 0x40;
+  prime22.palette[2] = 0x11 + 0x40;
+  prime22.palette[6] = 0x14 + 0x40;
+  prime22.palette[3] = 0x17 + 0x40;
+  prime22.palette[4] = 0x1a + 0x40;
+  prime22.palette[5] = 0x1d + 0x40;
 
   mode2.prime[0] = &prime20;
   mode2.prime[1] = &prime21;
@@ -163,25 +165,25 @@ void setupModes() {
   mode4.prime[1] = &prime41;
 
   // Mode5
-  prime50.num_colors = 5;
-  prime50.palette[0] = 0x16 + 0x40;
-  prime50.palette[1] = 0x00;
-  prime50.palette[2] = 0x1a + 0x40;
-  prime50.palette[3] = 0x0f + 0x40;
-  prime50.palette[4] = 0x00;
-  prime50.palette[5] = 0x00;
-  prime50.palette[6] = 0x00;
-  prime50.palette[7] = 0x00;
+  prime50.num_colors = 8;
+  prime50.palette[0] = 0x18 + 0x40;
+  prime50.palette[1] = 0x18 + 0xc0;
+  prime50.palette[2] = 0x00 + 0x00;
+  prime50.palette[3] = 0x2a + 0x40;
+  prime50.palette[4] = 0x2a + 0xc0;
+  prime50.palette[5] = 0x00 + 0x00;
+  prime50.palette[6] = 0x10 + 0x40;
+  prime50.palette[7] = 0x10 + 0xc0;
 
   prime51.num_colors = 7;
-  prime51.palette[0] = 0x16 + 0x40;
-  prime51.palette[1] = 0x08 + 0xc0;
-  prime51.palette[2] = 0x1a + 0x40;
-  prime51.palette[3] = 0x08 + 0xc0;
-  prime51.palette[4] = 0x0f + 0x40;
-  prime51.palette[5] = 0x08 + 0xc0;
-  prime51.palette[6] = 0x00;
-  prime51.palette[7] = 0x00;
+  prime51.palette[0] = 0x18 + 0x40;
+  prime51.palette[1] = 0x39 + 0x40;
+  prime51.palette[2] = 0x2a + 0x40;
+  prime51.palette[3] = 0x39 + 0x40;
+  prime51.palette[4] = 0x10 + 0x40;
+  prime51.palette[5] = 0x39 + 0x40;
+  prime51.palette[6] = 0x00 + 0x00;
+  prime51.palette[7] = 0x00 + 0x00;
 
   mode5.prime[0] = &prime50;
   mode5.prime[1] = &prime51;
@@ -198,13 +200,13 @@ void setupModes() {
   prime60.palette[7] = 0x00 + 0x40;
 
   prime61.num_colors = 8;
-  prime61.palette[0] = 0x3e + 0x40;
+  prime61.palette[0] = 0x3e + 0xc0;
   prime61.palette[1] = 0x1a + 0x40;
-  prime61.palette[2] = 0x3e + 0x40;
-  prime61.palette[3] = 0x16 + 0x40;
-  prime61.palette[4] = 0x3e + 0x40;
-  prime61.palette[5] = 0x13 + 0x40;
-  prime61.palette[6] = 0x3e + 0x40;
+  prime61.palette[2] = 0x19 + 0x00;
+  prime61.palette[3] = 0x13 + 0x40;
+  prime61.palette[4] = 0x00 + 0x00;
+  prime61.palette[5] = 0x1f + 0x40;
+  prime61.palette[6] = 0x16 + 0x40;
   prime61.palette[7] = 0x00 + 0x40;
 
   mode6.prime[0] = &prime60;
@@ -254,7 +256,7 @@ void loadModes() {
 }
 
 // Change this to a value between 1 and 255 to upload new settings to the EEPROM
-uint8_t current_version = 42;
+uint8_t current_version = 41;
 
 // ********************************************************************
 // **** END OF MODE CUSTOMIZATION BLOCK. DO NOT EDIT UNDER HERE *******
@@ -290,7 +292,6 @@ int8_t accel_ar[64] = {
   -15, -14, -13, -12, -11, -10,  -9,  -8,  -7,  -6,  -5,  -4,  -3,  -2,  -1,   0,
 };
 
-/*
 // Gamma table ensures a smoother fade. Based on gamma=2.2
 static const uint8_t gamma_table[256] = {
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
@@ -310,11 +311,14 @@ static const uint8_t gamma_table[256] = {
   192, 194, 196, 198, 200, 202, 204, 205, 207, 209, 211, 213, 215, 217, 219, 221,
   224, 226, 228, 230, 232, 234, 236, 238, 240, 242, 245, 247, 249, 251, 253, 255,
 };
-*/
 
 void setup() {
-  Serial.begin(57600);
+#ifndef DEBUG
+  power_usart0_disable();
+#endif
+  power_spi_disable();
 
+  Serial.begin(57600);
   Serial.println(F("\nWelcome to Lumino!"));
 
   // Setup pins
@@ -343,8 +347,10 @@ void setup() {
   // Init accelerometer
   accInit();
 
+
   // Set up fast PWM mode on timer0 and timer1
   noInterrupts();
+  ADCSRA = 0; // Disable ADC
   TCCR0B = (TCCR0B & 0b11111000) | 0b001;  // no prescaler ~1/64ms
   TCCR1B = (TCCR1B & 0b11111000) | 0b001;  // no prescaler ~1/64ms
   interrupts();
@@ -386,7 +392,6 @@ void enterSleep() {
   // Put accelerometer to sleep
   // Disable volatage regulator
   // Delay a little so everything catches up
-  attachInterrupt(0, pushInterrupt, LOW);
   writeFrame(0, 0, 0);
   accStandby();
   digitalWrite(PIN_LDO, LOW);
@@ -395,7 +400,21 @@ void enterSleep() {
   // Set sleep mode and power down
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
   sleep_enable();
-  sleep_mode();
+  noInterrupts();
+  attachInterrupt(0, pushInterrupt, FALLING);
+  EIFR = bit(INTF0);  // clear flag for interrupt 0
+
+  // turn off brown-out enable in software
+  // BODS must be set to one and BODSE must be set to zero within four clock cycles
+  MCUCR = bit(BODS) | bit(BODSE);
+  // The BODS bit is automatically cleared after three clock cycles
+  MCUCR = bit(BODS);
+
+  // We are guaranteed that the sleep_cpu call will be done
+  // as the processor executes the next instruction after
+  // interrupts are turned on.
+  interrupts ();  // one cycle
+  sleep_cpu ();   // one cycle
 
   // Wait until button is releaed
   while (digitalRead(PIN_BUTTON) == LOW) {}
@@ -403,7 +422,6 @@ void enterSleep() {
   // Wake up. Power on LDO before trying to access the accelerometer
   // Wait for the accelerometer to come back online before continuing
   Serial.println(F("Waking up now"));
-  sleep_disable();
   digitalWrite(PIN_LDO, HIGH);
   accInit();
   setMode(0);
@@ -412,7 +430,7 @@ void enterSleep() {
 }
 
 void pushInterrupt() {
-  // Disable interrupt until next sleep
+  sleep_disable();
   detachInterrupt(0);
 }
 
@@ -442,9 +460,12 @@ void writeFrame(uint8_t r, uint8_t g, uint8_t b) {
   limiter = 0;
 
   // Write out the gamma-corrected color to the LED
-  analogWrite(PIN_R, r >> 1); //gamma_table[r >> 1]);
-  analogWrite(PIN_G, g >> 1); //gamma_table[g >> 1]);
-  analogWrite(PIN_B, b >> 1); //gamma_table[b >> 1]);
+  analogWrite(PIN_R, r >> 1);
+  analogWrite(PIN_G, g >> 1);
+  analogWrite(PIN_B, b >> 1);
+  //analogWrite(PIN_R, gamma_table[r >> 1]);
+  //analogWrite(PIN_G, gamma_table[g >> 1]);
+  //analogWrite(PIN_B, gamma_table[b >> 1]);
 }
 
 
