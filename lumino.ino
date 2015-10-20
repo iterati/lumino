@@ -486,7 +486,7 @@ float translate_accel(int8_t g, float fg, float alpha) {
     g = -64 + g;
   }
 
-  return (float)(g * alpha) + (fg * (1.0 - alpha));
+  return ((g / 20.0) * alpha) + (fg * (1.0 - alpha));
 }
 
 void accUpdate() {
