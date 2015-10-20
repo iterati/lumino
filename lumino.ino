@@ -285,32 +285,6 @@ uint16_t since_press = 0;
 bool conjure = false;
 bool conjure_toggle = false;
 
-int8_t accel_ar[64] = {
-    0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,
-   16,  17,  18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,
-  -31, -30, -29, -28, -27, -26, -25, -24, -23, -22, -21, -20, -19, -18, -16, -16,
-  -15, -14, -13, -12, -11, -10,  -9,  -8,  -7,  -6,  -5,  -4,  -3,  -2,  -1,   0,
-};
-
-// Gamma table ensures a smoother fade. Based on gamma=2.2
-static const uint8_t gamma_table[256] = {
-    0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-    0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   1,   1,   1,   2,   2,   2,
-    2,   2,   3,   3,   3,   3,   3,   4,   4,   4,   4,   5,   5,   5,   5,   6,
-    6,   6,   7,   7,   7,   8,   8,   8,   9,   9,   9,  10,  10,  11,  11,  11,
-   12,  12,  13,  13,  13,  14,  14,  15,  15,  16,  16,  17,  17,  18,  18,  19,
-   19,  20,  21,  21,  22,  22,  23,  24,  24,  25,  25,  26,  27,  27,  28,  29,
-   29,  30,  31,  31,  32,  33,  34,  34,  35,  36,  37,  37,  38,  39,  40,  41,
-   41,  42,  43,  44,  45,  46,  46,  47,  48,  49,  50,  51,  52,  53,  54,  55,
-   56,  57,  58,  59,  60,  61,  62,  63,  64,  65,  66,  67,  68,  69,  70,  71,
-   72,  73,  75,  76,  77,  78,  79,  80,  82,  83,  84,  85,  86,  88,  89,  90,
-   91,  93,  94,  95,  96,  98,  99, 100, 102, 103, 104, 106, 107, 109, 110, 111,
-  113, 114, 116, 117, 118, 120, 121, 123, 124, 126, 127, 129, 130, 132, 134, 135,
-  137, 138, 140, 141, 143, 145, 146, 148, 150, 151, 153, 155, 156, 158, 160, 161,
-  163, 165, 167, 168, 170, 172, 174, 175, 177, 179, 181, 183, 185, 186, 188, 190,
-  192, 194, 196, 198, 200, 202, 204, 205, 207, 209, 211, 213, 215, 217, 219, 221,
-  224, 226, 228, 230, 232, 234, 236, 238, 240, 242, 245, 247, 249, 251, 253, 255,
-};
 
 void setup() {
 #ifndef DEBUG
@@ -459,13 +433,9 @@ void writeFrame(uint8_t r, uint8_t g, uint8_t b) {
   while (limiter < 64000) {}
   limiter = 0;
 
-  // Write out the gamma-corrected color to the LED
   analogWrite(PIN_R, r >> 1);
   analogWrite(PIN_G, g >> 1);
   analogWrite(PIN_B, b >> 1);
-  //analogWrite(PIN_R, gamma_table[r >> 1]);
-  //analogWrite(PIN_G, gamma_table[g >> 1]);
-  //analogWrite(PIN_B, gamma_table[b >> 1]);
 }
 
 
@@ -476,30 +446,29 @@ void accSend(uint8_t reg_address, uint8_t data) {
   Wire.endTransmission();
 }
 
-void accUpdate() {
-  uint8_t x, y, z;
-  float xg, yg, zg;
+float translate_accel(int8_t g, float fg, float alpha) {
+  if (g >= 64) {
+    // Out of bounds, don't alter fg
+    return fg;
+  } else if (g >= 32) {
+    // Translate 32  - 63 to -32 - -1
+    g = -64 + g;
+  }
 
+  return (float)(g * alpha) + (fg * (1.0 - alpha));
+}
+
+void accUpdate() {
   Wire.beginTransmission(MMA7660_ADDRESS);
   Wire.write(0x00);
   Wire.endTransmission();
   Wire.requestFrom(MMA7660_ADDRESS, 3);
 
   if (Wire.available()) {
-    x = Wire.read();
-    y = Wire.read();
-    z = Wire.read();
+    fxg = translate_accel(Wire.read(), fxg, mode->alpha);
+    fyg = translate_accel(Wire.read(), fyg, mode->alpha);
+    fzg = translate_accel(Wire.read(), fzg, mode->alpha);
   }
-
-  // If the value is > 63, it's an error value and we just use previous
-  xg = (x < 64) ? accel_ar[x] / 20.0 : fxg;
-  yg = (y < 64) ? accel_ar[y] / 20.0 : fyg;
-  zg = (z < 64) ? accel_ar[z] / 20.0 : fzg;
-
-  //Low Pass Filter
-  fxg = xg * mode->alpha + (fxg * (1.0 - mode->alpha));
-  fyg = yg * mode->alpha + (fyg * (1.0 - mode->alpha));
-  fzg = zg * mode->alpha + (fzg * (1.0 - mode->alpha));
 }
 
 void accInit() {
