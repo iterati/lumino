@@ -43,6 +43,7 @@ Current Features:
 ## From Source
 
 * Download the latest .zip from the [releases tab](http://github.com/iterati/lumino/releases/).
+* Download https://github.com/iterati/lumino/releases/download/v0.3/lumino_v0_3.zip
 * Open the Arduino Editor.
 * Select **Sketch** -> **Import Library...** -> **Add Library...** from the menu and import the Lumino.zip you downloaded.
 * Select **File** -> **Examples** -> **Lumino** (will be near the bottom of the list) -> **lumino** from the menu.

@@ -453,7 +453,7 @@ void LegoPrime::incTick() {
 
 void EmberPrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   if (tick < (color_time - extra_blank)) {
-    unpackColor(palette[0], &color_r, &color_g, &color_b);
+    unpackColor(palette[cur_color], &color_r, &color_g, &color_b);
   } else {
     color_r = 0; color_g = 0; color_b = 0;
   }
@@ -476,6 +476,7 @@ void EmberPrime::incTick() {
       dir = -speed;
     } else if (extra_blank <= 0) {
       dir = speed;
+      cur_color = (cur_color + 1) % num_colors;
     }
   }
 }
