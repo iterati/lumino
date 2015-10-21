@@ -130,14 +130,12 @@ int8_t Prime::incIdx(int8_t v) {
       rtn_code = -1;
     } else {                                  // Otherwise return 0 and dec color
       edit_color--;
-      num_colors = edit_color + 1;
     }
   } else if (v > 0) {                         // When incrementing, return -1 if at end
     if (edit_color == PALETTE_SIZE - 1) {
       rtn_code = -1;
     } else {                                  // Otherwise return 0 and inc color
       edit_color++;
-      num_colors = edit_color + 1;
     }
   } else if (v == 0) {                        // 0 is resetting
     edit_color = 0;
@@ -385,6 +383,99 @@ void ChasePrime::incTick() {
     if (cur_step >= steps - 1) {
       cur_color = (cur_color + 1) % num_colors;
       cur_step = 0;
+    }
+  }
+}
+
+
+void TwoTimePrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
+  if (tick < color_time_a) {
+    unpackColor(palette[cur_color], &color_r, &color_g, &color_b);
+  } else if (tick < blank_time_a) {
+    color_r = 0; color_g = 0; color_b = 0;
+  } else if (tick < color_time_b) {
+    unpackColor(palette[cur_color], &color_r, &color_g, &color_b);
+  } else {
+    color_r = 0; color_g = 0; color_b = 0;
+  }
+  *r = color_r; *g = color_g; *b = color_b;
+}
+
+void TwoTimePrime::reset() {
+  tick = 0;
+  cur_color = 0;
+}
+
+void TwoTimePrime::incTick() {
+  tick++;
+  if (tick >= color_time_a + blank_time_a + color_time_b + color_time_b) {
+    tick = 0;
+    cur_color = (cur_color + 1) % num_colors;
+  }
+}
+
+
+void LegoPrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
+  if (tick < color_time) {
+    unpackColor(palette[cur_color], &color_r, &color_g, &color_b);
+  } else {
+    color_r = 0; color_g = 0; color_b = 0;
+  }
+  *r = color_r; *g = color_g; *b = color_b;
+}
+
+uint8_t getColorTime() {
+  switch (random(0, 3)) {
+    case 0:
+      return 2;
+    case 1:
+      return 8;
+    default:
+      return 16;
+  }
+}
+
+void LegoPrime::reset() {
+  tick = 0;
+  cur_color = 0;
+  color_time = getColorTime();
+}
+
+void LegoPrime::incTick() {
+  tick++;
+  if (tick >= color_time + blank_time) {
+    tick = 0;
+    cur_color = (cur_color + 1) % num_colors;
+    color_time = getColorTime();
+  }
+}
+
+
+void EmberPrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
+  if (tick < (color_time - extra_blank)) {
+    unpackColor(palette[0], &color_r, &color_g, &color_b);
+  } else {
+    color_r = 0; color_g = 0; color_b = 0;
+  }
+  *r = color_r; *g = color_g; *b = color_b;
+}
+
+void EmberPrime::reset() {
+  tick = 0;
+  cur_color = 0;
+  extra_blank = 0;
+  dir = speed;
+}
+
+void EmberPrime::incTick() {
+  tick++;
+  if (tick >= color_time + blank_time) {
+    tick = 0;
+    extra_blank += dir;
+    if (extra_blank >= color_time) {
+      dir = -speed;
+    } else if (extra_blank <= 0) {
+      dir = speed;
     }
   }
 }
@@ -842,3 +933,133 @@ void TiltMorph::nextPalette() {}
 int8_t TiltMorph::incIdx(int8_t v) { return 0; }
 void TiltMorph::incColor(int8_t v) {}
 void TiltMorph::incShade() {}
+
+
+//********************************************************************
+//*** GEOMORPH MODE **************************************************
+//********************************************************************
+void GeoMorph::render(uint8_t *r, uint8_t *g, uint8_t *b) {
+  if (render_mode == 0 || render_mode == 3) {
+    if (tick < color_time) {
+      color_r = geo_r; color_g = geo_g; color_b = geo_b;
+    } else {
+      color_r = 0; color_g = 0; color_b = 0;
+    }
+    tick++;
+  } else if (render_mode == 1) {
+    if (tick < 50) {
+      color_r = 255; color_g = 128; color_b = 0;
+    } else {
+      color_r = 0; color_g = 0; color_b = 0;
+    }
+    tick++;
+    if (tick >= 100) { tick = 0; }
+  } else {
+    unpackColor(palette[edit_color], &color_r, &color_g, &color_b);
+  }
+  *r = color_r; *g = color_g; *b = color_b;
+}
+
+void GeoMorph::updateAcc(float fxg, float fyg, float fzg) {
+  float pitch_x, pitch_y;
+  uint8_t target_r, target_g, target_b;
+
+  pitch_x = ((atan2(fyg, sqrt(fxg * fxg + fzg * fzg)) * 2.0) / M_PI) + 1.0;
+  pitch_y = ((atan2(fxg, sqrt(fyg * fyg + fzg * fzg)) * 2.0) / M_PI) + 1.0;
+
+  unpackColor(palette[0], &geo_r, &geo_g, &geo_b);
+  if (op_mode == GM_ONLYX) {
+    if (pitch_x >= 0) {
+      unpackColor(palette[1], &target_r, &target_g, &target_b);
+    } else {
+      unpackColor(palette[2], &target_r, &target_g, &target_b);
+    }
+    morphColor(abs(pitch_x), 90,
+        geo_r, geo_g, geo_b,
+        target_r, target_g, target_b,
+        &geo_r, &geo_g, &geo_b);
+  } else if (op_mode == GM_ONLYY) {
+    if (pitch_y >= 0) {
+      unpackColor(palette[1], &target_r, &target_g, &target_b);
+    } else {
+      unpackColor(palette[2], &target_r, &target_g, &target_b);
+    }
+    morphColor(abs(pitch_x), 90,
+        geo_r, geo_g, geo_b,
+        target_r, target_g, target_b,
+        &geo_r, &geo_g, &geo_b);
+  } else {
+    if (pitch_x >= 0) {
+      unpackColor(palette[1], &target_r, &target_g, &target_b);
+    } else {
+      unpackColor(palette[2], &target_r, &target_g, &target_b);
+    }
+    morphColor(abs(pitch_x), 90,
+        geo_r, geo_g, geo_b,
+        target_r, target_g, target_b,
+        &geo_r, &geo_g, &geo_b);
+    if (pitch_y >= 0) {
+      unpackColor(palette[3], &target_r, &target_g, &target_b);
+    } else {
+      unpackColor(palette[4], &target_r, &target_g, &target_b);
+    }
+    morphColor(abs(pitch_x), 90,
+        geo_r, geo_g, geo_b,
+        target_r, target_g, target_b,
+        &geo_r, &geo_g, &geo_b);
+  }
+}
+
+void GeoMorph::reset() {
+  tick = 0;
+}
+
+void GeoMorph::save(uint16_t addr) {
+  EEPROM.update(addr + 0, palette[0]);
+  EEPROM.update(addr + 1, palette[1]);
+  EEPROM.update(addr + 2, palette[2]);
+  EEPROM.update(addr + 3, palette[3]);
+  EEPROM.update(addr + 4, palette[4]);
+}
+
+void GeoMorph::load(uint16_t addr) {
+  palette[0] = EEPROM.read(addr + 0);
+  palette[1] = EEPROM.read(addr + 1);
+  palette[2] = EEPROM.read(addr + 2);
+  palette[3] = EEPROM.read(addr + 3);
+  palette[4] = EEPROM.read(addr + 4);
+}
+
+void GeoMorph::nextPalette() {}
+
+int8_t GeoMorph::incIdx(int8_t v) {
+  uint8_t rtn_code = 0;
+  if (v < 0) {                                // When decrementing, return -1 if at beginning
+    if (edit_color == 0) {
+      rtn_code = -1;
+    } else {                                  // Otherwise return 0 and dec color
+      edit_color--;
+    }
+  } else if (v > 0) {                         // When incrementing, return -1 if at end
+    if ((op_mode == GM_ONLYX || op_mode == GM_ONLYY) && edit_color >= 2) {
+        rtn_code = -1;
+    } else if (op_mode == GM_XANDY && edit_color >= 4) {
+        rtn_code = -1;
+    } else {
+      edit_color++;
+    }
+  } else if (v == 0) {                        // 0 is resetting
+    edit_color = 0;
+  }
+  Serial.print(F("editing color ")); Serial.println(edit_color + 1);
+  return rtn_code;
+}
+
+void GeoMorph::incColor(int8_t v) {
+  uint8_t idx = palette[edit_color] & 0b00111111;
+  palette[edit_color] = (palette[edit_color] & 0b11000000) + ((idx + v + 63) % 63);
+}
+
+void GeoMorph::incShade() {
+  palette[edit_color] += 0b01000000;
+}

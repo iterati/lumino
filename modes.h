@@ -147,6 +147,43 @@ class ChasePrime : public Prime {
     uint8_t steps, cur_step;
 };
 
+class TwoTimePrime : public Prime {
+  public:
+    TwoTimePrime(uint16_t color_time_a, uint16_t blank_time_a, uint16_t color_time_b, uint16_t blank_time_b) :
+      Prime(), color_time_a(color_time_a), blank_time_a(blank_time_a), color_time_b(color_time_b), blank_time_b(blank_time_b) {}
+
+    void render(uint8_t *r, uint8_t *g, uint8_t *b);
+    void reset();
+    void incTick();
+
+    uint16_t color_time_a, blank_time_a, color_time_b, blank_time_b;
+};
+
+class LegoPrime : public Prime { // Credit Andrew Suchan
+  public:
+    LegoPrime(uint16_t blank_time) : Prime(), blank_time(blank_time) {}
+
+    void render(uint8_t *r, uint8_t *g, uint8_t *b);
+    void reset();
+    void incTick();
+
+    uint16_t color_time, blank_time;
+};
+
+class EmberPrime : public Prime { // Credit Andrew Suchan
+  public:
+    EmberPrime(uint16_t color_time, uint16_t blank_time, uint8_t speed) :
+      Prime(), color_time(color_time), blank_time(blank_time), speed(speed) {}
+
+    void render(uint8_t *r, uint8_t *g, uint8_t *b);
+    void reset();
+    void incTick();
+
+    uint16_t color_time, blank_time;
+    int16_t extra_blank, dir;
+    uint8_t speed;
+};
+
 class RainbowPrime : public Prime {
   public:
     RainbowPrime(uint16_t color_time, uint16_t blank_time, uint16_t splits, uint16_t split_dist, uint16_t speed) :
@@ -289,6 +326,33 @@ class TiltMorph : public Mode {
 
     uint16_t hue, hue_offset;
     uint8_t color_time;
+};
+
+#define GM_ONLYX 0
+#define GM_ONLYY 1
+#define GM_XANDY 2
+
+class GeoMorph : public Mode {
+  public:
+    GeoMorph(uint8_t op_mode, uint16_t color_time, uint16_t blank_time, float alpha) :
+      Mode(alpha), op_mode(op_mode), color_time(color_time), blank_time(blank_time) {}
+
+    void render(uint8_t *r, uint8_t *g, uint8_t *b);
+    void reset();
+    void updateAcc(float fxg, float fyg, float fzg);
+    void load(uint16_t addr);
+    void save(uint16_t addr);
+
+    void nextPalette();
+    int8_t incIdx(int8_t v);
+    void incColor(int8_t v);
+    void incShade();
+
+    uint16_t color_time, blank_time;
+    uint8_t op_mode;
+    uint8_t palette[5];
+    uint8_t edit_color;
+    uint8_t geo_r, geo_g, geo_b;
 };
 
 #endif

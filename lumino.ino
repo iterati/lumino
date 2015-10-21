@@ -447,6 +447,8 @@ void setup() {
 #endif
   power_spi_disable();
 
+  randomSeed(analogRead(0));
+
   Serial.begin(115200);
   Serial.println(F("\nWelcome to Lumino!"));
 
