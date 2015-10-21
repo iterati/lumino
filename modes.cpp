@@ -391,9 +391,9 @@ void ChasePrime::incTick() {
 void TwoTimePrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   if (tick < color_time_a) {
     unpackColor(palette[cur_color], &color_r, &color_g, &color_b);
-  } else if (tick < blank_time_a) {
+  } else if (tick < color_time_a + blank_time_a) {
     color_r = 0; color_g = 0; color_b = 0;
-  } else if (tick < color_time_b) {
+  } else if (tick < color_time_a + blank_time_a + color_time_b) {
     unpackColor(palette[cur_color], &color_r, &color_g, &color_b);
   } else {
     color_r = 0; color_g = 0; color_b = 0;
@@ -408,7 +408,7 @@ void TwoTimePrime::reset() {
 
 void TwoTimePrime::incTick() {
   tick++;
-  if (tick >= color_time_a + blank_time_a + color_time_b + color_time_b) {
+  if (tick >= color_time_a + blank_time_a + color_time_b + blank_time_b) {
     tick = 0;
     cur_color = (cur_color + 1) % num_colors;
   }
@@ -484,6 +484,7 @@ void EmberPrime::incTick() {
 void RainbowPrime::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   if (tick < color_time) {
     unpackHue(hue + (split * split_dist), &color_r, &color_g, &color_b);
+    color_r = color_r >> 1; color_g = color_g >> 1; color_b = color_b >> 1;
   } else {
     color_r = 0; color_g = 0; color_b = 0;
   }
@@ -596,7 +597,7 @@ void DualMode::reset() {
 }
 
 void DualMode::updateAcc(float fxg, float fyg, float fzg) {
-  float roll;
+  float pitch;
   if (render_mode != 0) {
     return;
   }
@@ -633,22 +634,21 @@ void DualMode::updateAcc(float fxg, float fyg, float fzg) {
       break;
 
     case A_TILTX:
-      roll = (atan2(fxg, fzg) * 180.0) / M_PI;
+      pitch = (atan2(fxg, sqrt(fyg * fyg + fzg * fzg)) * 180.0) / M_PI;
       if (cur_variant == 0) {
-        cur_variant = roll < -75;
+        cur_variant = pitch < -75;
       } else {
-        cur_variant = roll < 75;
+        cur_variant = pitch < 75;
       }
       break;
 
     case A_TILTY:
-      roll = (atan2(fyg, fzg) * 180.0) / M_PI;
+      pitch = (atan2(fyg, sqrt(fxg * fxg + fzg * fzg)) * 180.0) / M_PI;
       if (cur_variant == 0) {
-        cur_variant = roll < -75;
+        cur_variant = pitch < -75;
       } else {
-        cur_variant = roll < 75;
+        cur_variant = pitch < 75;
       }
-
       break;
     default:  // TILTZ
       if (cur_variant == 0) {
@@ -722,32 +722,32 @@ void TriTilt::reset() {
 }
 
 void TriTilt::updateAcc(float fxg, float fyg, float fzg) {
-  float roll;
+  float pitch;
   if (render_mode != 0) {
     return;
   }
 
   if (tilt_axis == A_TILTX) {
-    roll = (atan2(-fxg, fzg) * 180.0) / M_PI;
+    pitch = (atan2(fxg, sqrt(fyg * fyg + fzg * fzg)) * 180.0) / M_PI;
   } else {
-    roll = (atan2(-fyg, fzg) * 180.0) / M_PI;
+    pitch = (atan2(fyg, sqrt(fxg * fxg + fzg * fzg)) * 180.0) / M_PI;
   }
 
   switch (cur_variant) {
     case 0:
-      if (roll < -75) {
+      if (pitch < -75) {
         cur_variant = 1;
-      } else if (roll > 75) {
+      } else if (pitch > 75) {
         cur_variant = 2;
       }
       break;
     case 1:
-      if (roll > 15) {
+      if (pitch > 15) {
         cur_variant = 0;
       }
       break;
     default:
-      if (roll < -15) {
+      if (pitch < -15) {
         cur_variant = 0;
       }
       break;
@@ -882,12 +882,13 @@ void TiltMorph::render(uint8_t *r, uint8_t *g, uint8_t *b) {
   if (render_mode == 0 || render_mode == 3) {
     if (tick < color_time) {
       unpackHue(hue + hue_offset, &color_r, &color_g, &color_b);
+      color_r = color_r >> 1; color_g = color_g >> 1; color_b = color_b >> 1;
     } else {
       color_r = 0; color_g = 0; color_b = 0;
     }
     tick++;
   } else {
-    color_r = 255; color_g = 0; color_b = 0;
+    color_r = 128; color_g = 0; color_b = 0;
   }
   *r = color_r; *g = color_g; *b = color_b;
 }
@@ -948,7 +949,7 @@ void GeoMorph::render(uint8_t *r, uint8_t *g, uint8_t *b) {
     tick++;
   } else if (render_mode == 1) {
     if (tick < 50) {
-      color_r = 255; color_g = 128; color_b = 0;
+      color_r = 128; color_g = 128; color_b = 0;
     } else {
       color_r = 0; color_g = 0; color_b = 0;
     }
@@ -958,14 +959,14 @@ void GeoMorph::render(uint8_t *r, uint8_t *g, uint8_t *b) {
     unpackColor(palette[edit_color], &color_r, &color_g, &color_b);
   }
   *r = color_r; *g = color_g; *b = color_b;
+  tick++;
+  if (tick >= color_time + blank_time) tick = 0;
 }
 
 void GeoMorph::updateAcc(float fxg, float fyg, float fzg) {
-  float pitch_x, pitch_y;
+  float pitch_x = (atan2(fxg, sqrt(fyg * fyg + fzg * fzg)) * 2.0) / M_PI;
+  float pitch_y = (atan2(fyg, sqrt(fxg * fxg + fzg * fzg)) * 2.0) / M_PI;
   uint8_t target_r, target_g, target_b;
-
-  pitch_x = ((atan2(fyg, sqrt(fxg * fxg + fzg * fzg)) * 2.0) / M_PI) + 1.0;
-  pitch_y = ((atan2(fxg, sqrt(fyg * fyg + fzg * fzg)) * 2.0) / M_PI) + 1.0;
 
   unpackColor(palette[0], &geo_r, &geo_g, &geo_b);
   if (op_mode == GM_ONLYX) {
@@ -974,7 +975,7 @@ void GeoMorph::updateAcc(float fxg, float fyg, float fzg) {
     } else {
       unpackColor(palette[2], &target_r, &target_g, &target_b);
     }
-    morphColor(abs(pitch_x), 90,
+    morphColor(20 * abs(pitch_y), 20,
         geo_r, geo_g, geo_b,
         target_r, target_g, target_b,
         &geo_r, &geo_g, &geo_b);
@@ -984,7 +985,7 @@ void GeoMorph::updateAcc(float fxg, float fyg, float fzg) {
     } else {
       unpackColor(palette[2], &target_r, &target_g, &target_b);
     }
-    morphColor(abs(pitch_x), 90,
+    morphColor(20 * abs(pitch_y), 20,
         geo_r, geo_g, geo_b,
         target_r, target_g, target_b,
         &geo_r, &geo_g, &geo_b);
@@ -994,7 +995,7 @@ void GeoMorph::updateAcc(float fxg, float fyg, float fzg) {
     } else {
       unpackColor(palette[2], &target_r, &target_g, &target_b);
     }
-    morphColor(abs(pitch_x), 90,
+    morphColor(20 * abs(pitch_x), 20,
         geo_r, geo_g, geo_b,
         target_r, target_g, target_b,
         &geo_r, &geo_g, &geo_b);
@@ -1003,7 +1004,7 @@ void GeoMorph::updateAcc(float fxg, float fyg, float fzg) {
     } else {
       unpackColor(palette[4], &target_r, &target_g, &target_b);
     }
-    morphColor(abs(pitch_x), 90,
+    morphColor(20 * abs(pitch_y), 20,
         geo_r, geo_g, geo_b,
         target_r, target_g, target_b,
         &geo_r, &geo_g, &geo_b);
@@ -1062,4 +1063,226 @@ void GeoMorph::incColor(int8_t v) {
 
 void GeoMorph::incShade() {
   palette[edit_color] += 0b01000000;
+}
+
+
+//********************************************************************
+//*** INOVA MODE *****************************************************
+//********************************************************************
+void iNova::render(uint8_t *r, uint8_t *g, uint8_t *b) {
+  *r = color_r; *g = color_g, *b = color_b;
+}
+
+void iNova::reset() {
+  tick = 0;
+  op_mode = 0;
+  counter = 0;
+  go_off = false;
+  button_state = 0;
+}
+
+int8_t iNova::handlePress(bool pressed) {
+  switch (op_mode) {
+    case INOVA_OFF:
+      if (pressed) {
+        Serial.println(F("inova pressed"));
+        counter = 0;
+        button_state = 1;
+        op_mode = INOVA_ON_WAIT;
+      } else if (counter > 300000) { // Sleep after 5 min idle
+        return 3; // sleep
+      }
+      color_r = 0; color_g = 0; color_b = 0;
+      break;
+
+    case INOVA_ON_WAIT:
+      // show color
+      // if held for 1.5s - 3s, we're going to next mode on release
+      // if held for more than 3s, we're going to config the color
+      // if released before 1.5s, go to ON
+      if (!pressed) {
+        if (counter >= 5000) {
+          Serial.println(F("inova config"));
+          op_mode = INOVA_CONFIG;
+        } else if (counter >= 1500) {
+          Serial.println(F("inova next mode"));
+          return 1; // next mode
+        } else {
+          Serial.println(F("inova on"));
+          op_mode = INOVA_ON;
+        }
+        button_state = 0;
+      } else {
+        if (counter == 5000) {
+          return 12; // flash yellow
+        }
+      }
+      unpackColor(color, &color_r, &color_g, &color_b);
+      break;
+
+    case INOVA_ON:
+      // solid color if not pressed, blank if pressed
+      // if released after TIMEOUT, go to OFF
+      // if released before, reset counter and go to DOPS
+      if (button_state == 0) {
+        if (pressed) {
+          Serial.println(F("inova on pressed"));
+          button_state = 1;
+          go_off = (counter >= INOVA_TIMEOUT);
+        }
+        unpackColor(color, &color_r, &color_g, &color_b);
+      } else {
+        if (!pressed) {
+          if (go_off) {
+            Serial.println(F("inova off"));
+            op_mode = INOVA_OFF;
+            counter = 0;
+          } else {
+            Serial.print(F("inova dops ")); Serial.println(counter);
+            op_mode = INOVA_DOPS;
+            tick = 0;
+            counter = 0;
+          }
+          button_state = 0;
+        }
+        color_r = 0; color_g = 0; color_b = 0;
+      }
+      break;
+
+    case INOVA_DOPS:
+      // dops color if not pressed, blank if pressed
+      // if released after TIMEOUT, go to OFF
+      // if released before, reset counter and go to SIGNAL
+      if (button_state == 0) {
+        if (pressed) {
+          Serial.println(F("inova dops pressed"));
+          button_state = 1;
+          go_off = (counter >= INOVA_TIMEOUT);
+        }
+
+        // dops
+        if (tick >= 11) tick = 0;
+        if (tick < 1) {
+          unpackColor(color, &color_r, &color_g, &color_b);
+        } else {
+          color_r = 0; color_g = 0; color_b = 0;
+        }
+      } else {
+        if (!pressed) {
+          if (go_off) {
+            Serial.println(F("inova off"));
+            op_mode = INOVA_OFF;
+            counter = 0;
+          } else {
+            Serial.print(F("inova signal ")); Serial.println(counter);
+            op_mode = INOVA_SIGNAL;
+            tick = 0;
+            counter = 0;
+          }
+          button_state = 0;
+        }
+        color_r = 0; color_g = 0; color_b = 0;
+      }
+      break;
+
+    case INOVA_SIGNAL:
+      // signal color if not pressed, blank if pressed
+      // on release go to OFF
+      if (button_state == 0) {
+        if (pressed) {
+          Serial.println(F("inova signal pressed"));
+          button_state = 1;
+        }
+
+        // signal
+        if (tick >= 300) tick = 0;
+        if (tick < 11) {
+          unpackColor(color, &color_r, &color_g, &color_b);
+        } else {
+          color_r = 0; color_g = 0; color_b = 0;
+        }
+      } else {
+        if (!pressed) {
+          Serial.println(F("inova off"));
+          button_state = 0;
+          op_mode = INOVA_OFF;
+          counter = 0;
+        }
+        color_r = 0; color_g = 0; color_b = 0;
+      }
+      break;
+
+    default: // INOVA_CONFIG
+      // press goes forward a color
+      // dpress goes back a color
+      // hold selects shade
+      // release from hold saves and exits to INOVA_OFF
+      switch (button_state) {
+        case 0:
+          if (pressed) {
+            Serial.println(F("inova config pressed"));
+            counter = 0;
+            button_state = 1;
+          }
+          break;
+        case 1:
+          if (!pressed) {
+            button_state = 2;
+          } else if (counter >= 1000) {
+            Serial.println(F("inova config will pick"));
+            counter -= 1000;
+            button_state = 3;
+            return 10; // flash white
+          }
+          break;
+        case 2:
+          if (pressed) {
+            Serial.println(F("inova config prev color"));
+            incColor(-1);
+            button_state = 99;
+          } else if (counter >= 350) {
+            Serial.println(F("inova config next color"));
+            incColor(1);
+            button_state = 0;
+          }
+          break;
+        case 3:
+          if (!pressed) {
+            Serial.println(F("inova config save"));
+            op_mode = INOVA_OFF;
+            counter = 0;
+            return 2; // save
+          } else if (counter > 500) {
+            Serial.println(F("inova config next shade"));
+            incShade();
+            counter -= 500;
+            return 10; // flash white
+          }
+          break;
+        default:
+          if (!pressed) {
+            button_state = 0;
+          }
+          break;
+      }
+      unpackColor(color, &color_r, &color_g, &color_b);
+  }
+  tick++;
+  counter++;
+  return 0;
+}
+
+void iNova::updateAcc(float fxg, float fyg, float fzg) {}
+void iNova::save(uint16_t addr) { EEPROM.update(addr, color); }
+void iNova::load(uint16_t addr) { color = EEPROM.read(addr); }
+void iNova::nextPalette() {}
+int8_t iNova::incIdx(int8_t v) { return 0; }
+
+void iNova::incColor(int8_t v) {
+  uint8_t idx = color & 0b00111111;
+  color = (color & 0b11000000) + ((idx + v + 63) % 63);
+}
+
+void iNova::incShade() {
+  color += 0b01000000;
 }

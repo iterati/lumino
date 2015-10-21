@@ -207,7 +207,7 @@ class RainbowPrime : public Prime {
 // the acc sensitivity.
 class Mode {
   public:
-    Mode(float alpha) : alpha(alpha) {}
+    Mode(float alpha, bool use_button) : alpha(alpha), use_button(use_button) {}
 
     virtual void render(uint8_t *r, uint8_t *g, uint8_t *b) {}
     virtual void reset() {}
@@ -221,14 +221,17 @@ class Mode {
     virtual void load(uint16_t addr) {}
     virtual void save(uint16_t addr) {}
 
+    virtual int8_t handlePress(bool pressed) {}
+
     float alpha;
     uint32_t tick;
     uint8_t render_mode;
+    bool use_button;
 };
 
 class SingleMode : public Mode {
   public:
-    SingleMode() : Mode(0) {}
+    SingleMode() : Mode(0, false) {}
 
     void render(uint8_t *r, uint8_t *g, uint8_t *b);
     void reset();
@@ -240,6 +243,8 @@ class SingleMode : public Mode {
     int8_t incIdx(int8_t v);
     void incColor(int8_t v);
     void incShade();
+
+    int8_t handlePress(bool pressed) {}
 
     Prime *prime;
 };
@@ -247,7 +252,7 @@ class SingleMode : public Mode {
 class DualMode : public Mode {
   // acc_mode: 0 - tiltX, 1 - tiltY, 2 - tiltZ, 3 - shake
   public:
-    DualMode(uint8_t acc_mode, float alpha) : Mode(alpha), acc_mode(acc_mode), cur_variant(0) {}
+    DualMode(uint8_t acc_mode, float alpha) : Mode(alpha, false), acc_mode(acc_mode), cur_variant(0) {}
 
     void render(uint8_t *r, uint8_t *g, uint8_t *b);
     void reset();
@@ -259,6 +264,8 @@ class DualMode : public Mode {
     int8_t incIdx(int8_t v);
     void incColor(int8_t v);
     void incShade();
+
+    int8_t handlePress(bool pressed) {}
 
     uint8_t acc_mode;
     uint8_t cur_variant;
@@ -270,7 +277,7 @@ class DualMode : public Mode {
 
 class TriTilt : public Mode {
   public:
-    TriTilt(uint8_t tilt_axis, float alpha) : Mode(alpha), tilt_axis(tilt_axis) {}
+    TriTilt(uint8_t tilt_axis, float alpha) : Mode(alpha, false), tilt_axis(tilt_axis) {}
 
     void render(uint8_t *r, uint8_t *g, uint8_t *b);
     void reset();
@@ -282,6 +289,8 @@ class TriTilt : public Mode {
     int8_t incIdx(int8_t v);
     void incColor(int8_t v);
     void incShade();
+
+    int8_t handlePress(bool pressed) {}
 
     uint8_t tilt_axis;
     uint8_t cur_variant;
@@ -290,7 +299,7 @@ class TriTilt : public Mode {
 
 class TriSpeed : public Mode {
   public:
-    TriSpeed(float alpha) : Mode(alpha) {}
+    TriSpeed(float alpha) : Mode(alpha, false) {}
 
     void render(uint8_t *r, uint8_t *g, uint8_t *b);
     void reset();
@@ -302,6 +311,8 @@ class TriSpeed : public Mode {
     int8_t incIdx(int8_t v);
     void incColor(int8_t v);
     void incShade();
+
+    int8_t handlePress(bool pressed) {}
 
     uint8_t cur_variant;
     int16_t acc_counter;
@@ -311,7 +322,7 @@ class TriSpeed : public Mode {
 
 class TiltMorph : public Mode {
   public:
-    TiltMorph(float alpha) : Mode(alpha) {}
+    TiltMorph(float alpha) : Mode(alpha, false) {}
 
     void render(uint8_t *r, uint8_t *g, uint8_t *b);
     void reset();
@@ -323,6 +334,8 @@ class TiltMorph : public Mode {
     int8_t incIdx(int8_t v);
     void incColor(int8_t v);
     void incShade();
+
+    int8_t handlePress(bool pressed) {}
 
     uint16_t hue, hue_offset;
     uint8_t color_time;
@@ -335,7 +348,7 @@ class TiltMorph : public Mode {
 class GeoMorph : public Mode {
   public:
     GeoMorph(uint8_t op_mode, uint16_t color_time, uint16_t blank_time, float alpha) :
-      Mode(alpha), op_mode(op_mode), color_time(color_time), blank_time(blank_time) {}
+      Mode(alpha, false), op_mode(op_mode), color_time(color_time), blank_time(blank_time) {}
 
     void render(uint8_t *r, uint8_t *g, uint8_t *b);
     void reset();
@@ -348,11 +361,45 @@ class GeoMorph : public Mode {
     void incColor(int8_t v);
     void incShade();
 
+    int8_t handlePress(bool pressed) {}
+
     uint16_t color_time, blank_time;
     uint8_t op_mode;
     uint8_t palette[5];
     uint8_t edit_color;
     uint8_t geo_r, geo_g, geo_b;
+};
+
+#define INOVA_TIMEOUT 2850
+#define INOVA_OFF 0
+#define INOVA_ON 1
+#define INOVA_DOPS 2
+#define INOVA_SIGNAL 3
+#define INOVA_ON_WAIT 4
+#define INOVA_CONFIG 10
+
+class iNova : public Mode {
+  public:
+    iNova() : Mode(0, true) {}
+
+    void render(uint8_t *r, uint8_t *g, uint8_t *b);
+    void reset();
+    void updateAcc(float fxg, float fyg, float fzg);
+    void load(uint16_t addr);
+    void save(uint16_t addr);
+
+    void nextPalette();
+    int8_t incIdx(int8_t v);
+    void incColor(int8_t v);
+    void incShade();
+
+    int8_t handlePress(bool pressed);
+
+    uint8_t op_mode;
+    uint8_t color;
+    uint32_t counter;
+    uint8_t button_state;
+    bool go_off;
 };
 
 #endif
