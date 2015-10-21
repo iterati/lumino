@@ -596,7 +596,7 @@ void DualMode::reset() {
 }
 
 void DualMode::updateAcc(float fxg, float fyg, float fzg) {
-  float roll;
+  float pitch;
   if (render_mode != 0) {
     return;
   }
@@ -633,22 +633,21 @@ void DualMode::updateAcc(float fxg, float fyg, float fzg) {
       break;
 
     case A_TILTX:
-      roll = (atan2(fxg, fzg) * 180.0) / M_PI;
+      pitch = (atan2(fxg, sqrt(fyg * fyg + fzg * fzg)) * 180.0) / M_PI;
       if (cur_variant == 0) {
-        cur_variant = roll < -75;
+        cur_variant = pitch < -75;
       } else {
-        cur_variant = roll < 75;
+        cur_variant = pitch < 75;
       }
       break;
 
     case A_TILTY:
-      roll = (atan2(fyg, fzg) * 180.0) / M_PI;
+      pitch = (atan2(fyg, sqrt(fxg * fxg + fzg * fzg)) * 180.0) / M_PI;
       if (cur_variant == 0) {
-        cur_variant = roll < -75;
+        cur_variant = pitch < -75;
       } else {
-        cur_variant = roll < 75;
+        cur_variant = pitch < 75;
       }
-
       break;
     default:  // TILTZ
       if (cur_variant == 0) {
@@ -722,32 +721,32 @@ void TriTilt::reset() {
 }
 
 void TriTilt::updateAcc(float fxg, float fyg, float fzg) {
-  float roll;
+  float pitch;
   if (render_mode != 0) {
     return;
   }
 
   if (tilt_axis == A_TILTX) {
-    roll = (atan2(-fxg, fzg) * 180.0) / M_PI;
+    pitch = (atan2(fyg, sqrt(fxg * fxg + fzg * fzg)) * 180.0) / M_PI;
   } else {
-    roll = (atan2(-fyg, fzg) * 180.0) / M_PI;
+    pitch = (atan2(fxg, sqrt(fyg * fyg + fzg * fzg)) * 180.0) / M_PI;
   }
 
   switch (cur_variant) {
     case 0:
-      if (roll < -75) {
+      if (pitch < -75) {
         cur_variant = 1;
-      } else if (roll > 75) {
+      } else if (pitch > 75) {
         cur_variant = 2;
       }
       break;
     case 1:
-      if (roll > 15) {
+      if (pitch > 15) {
         cur_variant = 0;
       }
       break;
     default:
-      if (roll < -15) {
+      if (pitch < -15) {
         cur_variant = 0;
       }
       break;
@@ -958,14 +957,14 @@ void GeoMorph::render(uint8_t *r, uint8_t *g, uint8_t *b) {
     unpackColor(palette[edit_color], &color_r, &color_g, &color_b);
   }
   *r = color_r; *g = color_g; *b = color_b;
+  tick++;
+  if (tick >= color_time + blank_time) tick = 0;
 }
 
 void GeoMorph::updateAcc(float fxg, float fyg, float fzg) {
-  float pitch_x, pitch_y;
+  float pitch_x = (atan2(fxg, sqrt(fyg * fyg + fzg * fzg)) * 2.0) / M_PI;
+  float pitch_y = (atan2(fyg, sqrt(fxg * fxg + fzg * fzg)) * 2.0) / M_PI;
   uint8_t target_r, target_g, target_b;
-
-  pitch_x = ((atan2(fyg, sqrt(fxg * fxg + fzg * fzg)) * 2.0) / M_PI) + 1.0;
-  pitch_y = ((atan2(fxg, sqrt(fyg * fyg + fzg * fzg)) * 2.0) / M_PI) + 1.0;
 
   unpackColor(palette[0], &geo_r, &geo_g, &geo_b);
   if (op_mode == GM_ONLYX) {
@@ -974,7 +973,7 @@ void GeoMorph::updateAcc(float fxg, float fyg, float fzg) {
     } else {
       unpackColor(palette[2], &target_r, &target_g, &target_b);
     }
-    morphColor(abs(pitch_x), 90,
+    morphColor(20 * abs(pitch_y), 20,
         geo_r, geo_g, geo_b,
         target_r, target_g, target_b,
         &geo_r, &geo_g, &geo_b);
@@ -984,7 +983,7 @@ void GeoMorph::updateAcc(float fxg, float fyg, float fzg) {
     } else {
       unpackColor(palette[2], &target_r, &target_g, &target_b);
     }
-    morphColor(abs(pitch_x), 90,
+    morphColor(20 * abs(pitch_y), 20,
         geo_r, geo_g, geo_b,
         target_r, target_g, target_b,
         &geo_r, &geo_g, &geo_b);
@@ -994,7 +993,7 @@ void GeoMorph::updateAcc(float fxg, float fyg, float fzg) {
     } else {
       unpackColor(palette[2], &target_r, &target_g, &target_b);
     }
-    morphColor(abs(pitch_x), 90,
+    morphColor(20 * abs(pitch_x), 20,
         geo_r, geo_g, geo_b,
         target_r, target_g, target_b,
         &geo_r, &geo_g, &geo_b);
@@ -1003,7 +1002,7 @@ void GeoMorph::updateAcc(float fxg, float fyg, float fzg) {
     } else {
       unpackColor(palette[4], &target_r, &target_g, &target_b);
     }
-    morphColor(abs(pitch_x), 90,
+    morphColor(20 * abs(pitch_y), 20,
         geo_r, geo_g, geo_b,
         target_r, target_g, target_b,
         &geo_r, &geo_g, &geo_b);

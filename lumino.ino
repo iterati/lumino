@@ -9,7 +9,7 @@
 #include "elapsedMillis.h"
 #include "modes.h"
 
-// #define DEBUG
+#define DEBUG
 // ********************************************************************
 
 
@@ -22,19 +22,20 @@
 uint16_t mode_addrs[NUM_MODES];
 
 // DEFINE MODES AND PRIMES HERE. Palettes go in setupModes()
-TiltMorph mode0 = TiltMorph(0.05);
+//TiltMorph mode0 = TiltMorph(0.05);
+GeoMorph mode0 = GeoMorph(GM_XANDY, 5, 8, 0.05);
 
 // Mode1
 TriSpeed mode1 = TriSpeed(0.9);
-RainbowPrime prime10 = RainbowPrime(3,  36,   2, 512, 52);
-RainbowPrime prime11 = RainbowPrime(3,  23,   3, 256, 52);
-RainbowPrime prime12 = RainbowPrime(3,  10,   5, 128, 52);
+RainbowPrime prime10 = RainbowPrime(3, 23, 2, 512, 52);
+RainbowPrime prime11 = RainbowPrime(5,  8, 3, 256, 52);
+RainbowPrime prime12 = RainbowPrime(3, 10, 5, 128, 52);
 
 // Mode2
 TriSpeed mode2 = TriSpeed(0.9);
-CandyStrobePrime prime20 = CandyStrobePrime(3,  49,  3, 10);
-CandyStrobePrime prime21 = CandyStrobePrime(3,  23,  3, 20);
-CandyStrobePrime prime22 = CandyStrobePrime(3,  10,  3, 40);
+CandyStrobePrime prime20 = CandyStrobePrime(3, 49, 3, 10);
+CandyStrobePrime prime21 = CandyStrobePrime(3, 23, 3, 20);
+CandyStrobePrime prime22 = CandyStrobePrime(3, 10, 3, 40);
 
 // Mode3
 DualMode mode3 = DualMode(A_SPEED, 0.75);
@@ -63,25 +64,25 @@ FadePrime prime71 = FadePrime(100, 50, 2);
 
 // Mode8
 TriTilt mode8 = TriTilt(A_TILTX, 0.05);
-StrobePrime prime80 = StrobePrime(5, 8);
-StrobePrime prime81 = StrobePrime(5, 8);
-StrobePrime prime82 = StrobePrime(5, 8);
+EmberPrime prime80 = EmberPrime(16, 16, 1);
+EmberPrime prime81 = EmberPrime(16, 16, 1);
+EmberPrime prime82 = EmberPrime(16, 16, 1);
 
 // Mode9
 TriTilt mode9 = TriTilt(A_TILTY, 0.05);
-StrobePrime prime90 = StrobePrime(5, 8);
-StrobePrime prime91 = StrobePrime(5, 8);
-StrobePrime prime92 = StrobePrime(5, 8);
+LegoPrime prime90 = LegoPrime(8);
+LegoPrime prime91 = LegoPrime(8);
+LegoPrime prime92 = LegoPrime(8);
 
 // Mode10
 DualMode mode10 = DualMode(A_TILTX, 0.05);
-StrobePrime prime100 = StrobePrime(5, 8);
-StrobePrime prime101 = StrobePrime(5, 8);
+TwoTimePrime prime100 = TwoTimePrime(1, 10, 15, 10);
+TwoTimePrime prime101 = TwoTimePrime(1, 10, 15, 10);
 
 // Mode11
 DualMode mode11 = DualMode(A_TILTY, 0.05);
-StrobePrime prime110 = StrobePrime(5, 8);
-StrobePrime prime111 = StrobePrime(5, 8);
+ChasePrime prime110 = ChasePrime(50, 5, 10);
+MorphPrime prime111 = MorphPrime(50, 5);
 
 
 // MAKE SURE ALL MODES ARE IN HERE AND THERE ARE AT LEAST NUM_MODES (default is 8) ENTRIES
@@ -109,9 +110,17 @@ int8_t bundles[NUM_BUNDLES][NUM_MODES] = {
 uint8_t cur_bundle = 0;
 uint8_t bundle_idx = 0;
 
+uint8_t inova_color = 0x01;
 
 // SETUP MODES HERE
 void setupModes() {
+  // Mode0
+  mode0.palette[0] = 0x08;
+  mode0.palette[1] = 0x1c;
+  mode0.palette[2] = 0x0c;
+  mode0.palette[3] = 0x10;
+  mode0.palette[4] = 0x18;
+
   // Mode1
   mode1.prime[0] = &prime10;
   mode1.prime[1] = &prime11;
@@ -201,48 +210,48 @@ void setupModes() {
   mode4.prime[1] = &prime41;
 
   // Mode5
-  prime50.num_colors = 8;
-  prime50.palette[0] = 0x18 + 0x40;
-  prime50.palette[1] = 0x18 + 0xc0;
-  prime50.palette[2] = 0x00 + 0x00;
-  prime50.palette[3] = 0x2a + 0x40;
-  prime50.palette[4] = 0x2a + 0xc0;
-  prime50.palette[5] = 0x00 + 0x00;
-  prime50.palette[6] = 0x10 + 0x40;
-  prime50.palette[7] = 0x10 + 0xc0;
+  prime50.num_colors = 1;
+  prime50.palette[0] = 0x00 + 0x40;
+  prime50.palette[1] = 0x00 + 0x40;
+  prime50.palette[2] = 0x00 + 0x40;
+  prime50.palette[3] = 0x00 + 0x40;
+  prime50.palette[4] = 0x00 + 0x40;
+  prime50.palette[5] = 0x00 + 0x40;
+  prime50.palette[6] = 0x00 + 0x40;
+  prime50.palette[7] = 0x00 + 0x40;
 
-  prime51.num_colors = 7;
-  prime51.palette[0] = 0x18 + 0x40;
-  prime51.palette[1] = 0x39 + 0x40;
-  prime51.palette[2] = 0x2a + 0x40;
-  prime51.palette[3] = 0x39 + 0x40;
-  prime51.palette[4] = 0x10 + 0x40;
-  prime51.palette[5] = 0x39 + 0x40;
-  prime51.palette[6] = 0x00 + 0x00;
-  prime51.palette[7] = 0x00 + 0x00;
+  prime51.num_colors = 8;
+  prime51.palette[0] = 0x08 + 0x40;
+  prime51.palette[1] = 0x0b + 0x40;
+  prime51.palette[7] = 0x0e + 0x40;
+  prime51.palette[2] = 0x11 + 0x40;
+  prime51.palette[6] = 0x14 + 0x40;
+  prime51.palette[3] = 0x17 + 0x40;
+  prime51.palette[4] = 0x1a + 0x40;
+  prime51.palette[5] = 0x1d + 0x40;
 
   mode5.prime[0] = &prime50;
   mode5.prime[1] = &prime51;
 
   // Mode6
-  prime60.num_colors = 8;
-  prime60.palette[0] = 0x39 + 0x40;
-  prime60.palette[1] = 0x1a + 0x40;
-  prime60.palette[2] = 0x39 + 0x40;
-  prime60.palette[3] = 0x16 + 0x40;
-  prime60.palette[4] = 0x39 + 0x40;
-  prime60.palette[5] = 0x13 + 0x40;
-  prime60.palette[6] = 0x39 + 0x40;
+  prime60.num_colors = 6;
+  prime60.palette[0] = 0x08 + 0x40;
+  prime60.palette[1] = 0x0c + 0x40;
+  prime60.palette[2] = 0x10 + 0x40;
+  prime60.palette[3] = 0x14 + 0x40;
+  prime60.palette[4] = 0x18 + 0x40;
+  prime60.palette[5] = 0x1c + 0x40;
+  prime60.palette[6] = 0x00 + 0x40;
   prime60.palette[7] = 0x00 + 0x40;
 
-  prime61.num_colors = 8;
-  prime61.palette[0] = 0x3e + 0xc0;
-  prime61.palette[1] = 0x1a + 0x40;
-  prime61.palette[2] = 0x19 + 0x00;
-  prime61.palette[3] = 0x13 + 0x40;
-  prime61.palette[4] = 0x00 + 0x00;
-  prime61.palette[5] = 0x1f + 0x40;
-  prime61.palette[6] = 0x16 + 0x40;
+  prime61.num_colors = 7;
+  prime61.palette[0] = 0x3d + 0x40;
+  prime61.palette[1] = 0x0a + 0x40;
+  prime61.palette[2] = 0x0e + 0x00;
+  prime61.palette[3] = 0x12 + 0x40;
+  prime61.palette[4] = 0x16 + 0x00;
+  prime61.palette[5] = 0x1a + 0x40;
+  prime61.palette[6] = 0x1e + 0x40;
   prime61.palette[7] = 0x00 + 0x40;
 
   mode6.prime[0] = &prime60;
@@ -260,7 +269,7 @@ void setupModes() {
   prime70.palette[7] = 0x00;
 
   prime71.num_colors = 1;
-  prime71.palette[0] = 0x1f;
+  prime71.palette[0] = 0x1e;
   prime71.palette[1] = 0x00;
   prime71.palette[2] = 0x00;
   prime71.palette[3] = 0x00;
@@ -273,35 +282,35 @@ void setupModes() {
   mode7.prime[1] = &prime71;
 
   // Mode8
-  prime80.num_colors = 8;
+  prime80.num_colors = 1;
   prime80.palette[0] = 0x08 + 0x40;
-  prime80.palette[1] = 0x09 + 0x40;
-  prime80.palette[2] = 0x0a + 0x40;
-  prime80.palette[3] = 0x0b + 0x40;
-  prime80.palette[4] = 0x0c + 0x40;
-  prime80.palette[5] = 0x0d + 0x40;
-  prime80.palette[6] = 0x0e + 0x40;
-  prime80.palette[7] = 0x0f + 0x40;
+  prime80.palette[1] = 0x00 + 0x40;
+  prime80.palette[2] = 0x00 + 0x40;
+  prime80.palette[3] = 0x00 + 0x40;
+  prime80.palette[4] = 0x00 + 0x40;
+  prime80.palette[5] = 0x00 + 0x40;
+  prime80.palette[6] = 0x00 + 0x40;
+  prime80.palette[7] = 0x00 + 0x40;
 
-  prime81.num_colors = 8;
+  prime81.num_colors = 1;
   prime81.palette[0] = 0x10 + 0x40;
-  prime81.palette[1] = 0x11 + 0x40;
-  prime81.palette[2] = 0x12 + 0x40;
-  prime81.palette[3] = 0x13 + 0x40;
-  prime81.palette[4] = 0x14 + 0x40;
-  prime81.palette[5] = 0x15 + 0x40;
-  prime81.palette[6] = 0x16 + 0x40;
-  prime81.palette[7] = 0x17 + 0x40;
+  prime81.palette[1] = 0x00 + 0x40;
+  prime81.palette[2] = 0x00 + 0x40;
+  prime81.palette[3] = 0x00 + 0x40;
+  prime81.palette[4] = 0x00 + 0x40;
+  prime81.palette[5] = 0x00 + 0x40;
+  prime81.palette[6] = 0x00 + 0x40;
+  prime81.palette[7] = 0x00 + 0x40;
 
-  prime82.num_colors = 8;
+  prime82.num_colors = 1;
   prime82.palette[0] = 0x18 + 0x40;
-  prime82.palette[1] = 0x19 + 0x40;
-  prime82.palette[2] = 0x1a + 0x40;
-  prime82.palette[3] = 0x1b + 0x40;
-  prime82.palette[4] = 0x1c + 0x40;
-  prime82.palette[5] = 0x1d + 0x40;
-  prime82.palette[6] = 0x1e + 0x40;
-  prime82.palette[7] = 0x1f + 0x40;
+  prime82.palette[1] = 0x00 + 0x40;
+  prime82.palette[2] = 0x00 + 0x40;
+  prime82.palette[3] = 0x00 + 0x40;
+  prime82.palette[4] = 0x00 + 0x40;
+  prime82.palette[5] = 0x00 + 0x40;
+  prime82.palette[6] = 0x00 + 0x40;
+  prime82.palette[7] = 0x00 + 0x40;
 
   mode8.prime[0] = &prime80;
   mode8.prime[1] = &prime81;
@@ -343,25 +352,25 @@ void setupModes() {
   mode9.prime[2] = &prime92;
 
   // Mode10
-  prime100.num_colors = 8;
-  prime100.palette[0] = 0x08 + 0x40;
-  prime100.palette[1] = 0x09 + 0x40;
-  prime100.palette[2] = 0x0a + 0x40;
-  prime100.palette[3] = 0x0b + 0x40;
-  prime100.palette[4] = 0x0c + 0x40;
-  prime100.palette[5] = 0x0d + 0x40;
-  prime100.palette[6] = 0x0e + 0x40;
-  prime100.palette[7] = 0x0f + 0x40;
+  prime100.num_colors = 5;
+  prime100.palette[0] = 0x1e + 0x40;
+  prime100.palette[1] = 0x1f + 0x40;
+  prime100.palette[2] = 0x08 + 0x40;
+  prime100.palette[3] = 0x09 + 0x40;
+  prime100.palette[4] = 0x0a + 0x40;
+  prime100.palette[5] = 0x00 + 0x40;
+  prime100.palette[6] = 0x00 + 0x40;
+  prime100.palette[7] = 0x00 + 0x40;
 
-  prime101.num_colors = 8;
-  prime101.palette[0] = 0x10 + 0x40;
-  prime101.palette[1] = 0x11 + 0x40;
-  prime101.palette[2] = 0x12 + 0x40;
-  prime101.palette[3] = 0x13 + 0x40;
-  prime101.palette[4] = 0x14 + 0x40;
-  prime101.palette[5] = 0x15 + 0x40;
-  prime101.palette[6] = 0x16 + 0x40;
-  prime101.palette[7] = 0x17 + 0x40;
+  prime101.num_colors = 5;
+  prime101.palette[0] = 0x12 + 0x40;
+  prime101.palette[1] = 0x13 + 0x40;
+  prime101.palette[2] = 0x14 + 0x40;
+  prime101.palette[3] = 0x15 + 0x40;
+  prime101.palette[4] = 0x16 + 0x40;
+  prime101.palette[5] = 0x00 + 0x40;
+  prime101.palette[6] = 0x00 + 0x40;
+  prime101.palette[7] = 0x00 + 0x40;
 
   mode10.prime[0] = &prime100;
   mode10.prime[1] = &prime101;
@@ -369,23 +378,23 @@ void setupModes() {
   // Mode11
   prime110.num_colors = 8;
   prime110.palette[0] = 0x08 + 0x40;
-  prime110.palette[1] = 0x09 + 0x40;
-  prime110.palette[2] = 0x0a + 0x40;
-  prime110.palette[3] = 0x0b + 0x40;
-  prime110.palette[4] = 0x0c + 0x40;
-  prime110.palette[5] = 0x0d + 0x40;
-  prime110.palette[6] = 0x0e + 0x40;
-  prime110.palette[7] = 0x0f + 0x40;
+  prime110.palette[1] = 0x0b + 0x40;
+  prime110.palette[7] = 0x0e + 0x40;
+  prime110.palette[2] = 0x11 + 0x40;
+  prime110.palette[6] = 0x14 + 0x40;
+  prime110.palette[3] = 0x17 + 0x40;
+  prime110.palette[4] = 0x1a + 0x40;
+  prime110.palette[5] = 0x1d + 0x40;
 
   prime111.num_colors = 8;
-  prime111.palette[0] = 0x10 + 0x40;
-  prime111.palette[1] = 0x11 + 0x40;
-  prime111.palette[2] = 0x12 + 0x40;
-  prime111.palette[3] = 0x13 + 0x40;
-  prime111.palette[4] = 0x14 + 0x40;
-  prime111.palette[5] = 0x15 + 0x40;
-  prime111.palette[6] = 0x16 + 0x40;
-  prime111.palette[7] = 0x17 + 0x40;
+  prime111.palette[0] = 0x08 + 0x40;
+  prime111.palette[1] = 0x0b + 0x40;
+  prime111.palette[7] = 0x0e + 0x40;
+  prime111.palette[2] = 0x11 + 0x40;
+  prime111.palette[6] = 0x14 + 0x40;
+  prime111.palette[3] = 0x17 + 0x40;
+  prime111.palette[4] = 0x1a + 0x40;
+  prime111.palette[5] = 0x1d + 0x40;
 
   mode11.prime[0] = &prime110;
   mode11.prime[1] = &prime111;
@@ -411,7 +420,7 @@ void loadModes() {
 }
 
 // Change this to a value between 1 and 255 to upload new settings to the EEPROM
-uint8_t current_version = 42;
+uint8_t current_version = 4;
 
 // ********************************************************************
 // **** END OF MODE CUSTOMIZATION BLOCK. DO NOT EDIT UNDER HERE *******
@@ -429,9 +438,7 @@ uint8_t current_version = 42;
 #define PIN_LDO A3
 #define MMA7660_ADDRESS 0x4C
 
-uint8_t cur_mode = 0;
 Mode *mode = modes[bundles[cur_bundle][bundle_idx]];
-
 elapsedMicros limiter = 0;
 uint8_t accel_counter = 0;
 float fxg, fyg, fzg = 0.0;
@@ -439,6 +446,9 @@ uint8_t button_state = 0;
 uint16_t since_press = 0;
 bool conjure = false;
 bool conjure_toggle = false;
+bool inova = false;
+uint8_t inova_mode = 0;
+uint8_t inova_tick = 0;
 
 
 void setup() {
@@ -449,7 +459,7 @@ void setup() {
 
   randomSeed(analogRead(0));
 
-  Serial.begin(115200);
+  Serial.begin(57600);
   Serial.println(F("\nWelcome to Lumino!"));
 
   // Setup pins
@@ -504,7 +514,29 @@ void loop() {
 
   // Get the color to be rendered
   uint8_t r, g, b;
-  mode->render(&r, &g, &b);
+  if (inova) {
+    if (inova_mode == 0) {
+      unpackColor(inova_color, &r, &g, &b);
+    } else if (inova_mode == 1) {
+      if (inova_tick < 1) {
+        unpackColor(inova_color, &r, &g, &b);
+      } else {
+        r = 0; g = 0; b = 0;
+      }
+      inova_tick++;
+      if (inova_tick >= 11) inova_tick = 0;
+    } else {
+      if (inova_tick < 13) {
+        unpackColor(inova_mode, &r, &g, &b);
+      } else {
+        r = 0; g = 0; b = 0;
+      }
+      inova_tick++;
+      if (inova_tick >= 33) inova_tick = 0;
+    }
+  } else {
+    mode->render(&r, &g, &b);
+  }
 
   // If conjuring and we toggled off, write blank. Otherwise write out the frame.
   if (conjure && conjure_toggle) {
@@ -568,7 +600,7 @@ void enterSleep() {
   digitalWrite(PIN_LDO, HIGH);
   accInit();
   resetMode();
-  conjure = conjure_toggle = false;
+  inova = conjure = conjure_toggle = false;
   delay(4000);
 }
 
@@ -670,6 +702,7 @@ void accStandby() {
 #define S_PLAY_SLEEP_WAIT       2
 #define S_PLAY_CONJURE_WAIT     3
 #define S_PLAY_CONFIG_WAIT      4
+#define S_PLAY_INOVA_WAIT       5
 
 #define S_PSELECT_OFF           10
 #define S_PSELECT_PRESSED       11
@@ -708,9 +741,13 @@ void handlePress(bool pressed) {
           if (conjure_toggle) { Serial.println(F("conjure_toggle off")); }
           else {                Serial.println(F("conjure_toggle on")); }
           conjure_toggle = !conjure_toggle;
+        } else if (inova) {
+          Serial.println(F("changing inova mode"));
+          inova_mode = (inova_mode + 1) % 3;
+          inova_tick = 0;
         } else {
-          Serial.print(F("changing to mode ")); Serial.println(((cur_mode + 1) % NUM_MODES) + 1);
           incMode();
+          Serial.print(F("changing to mode ")); Serial.println(bundles[cur_bundle][bundle_idx]);
         }
         button_state = S_PLAY_OFF;
       } else if (since_press > 1000) {
@@ -725,6 +762,20 @@ void handlePress(bool pressed) {
         enterSleep();
         button_state = S_PLAY_OFF;
       } else if (since_press > 3000) {
+        Serial.println(F("will inova"));
+        flash(0, 128, 0, 5); since_press += 500;
+        button_state = S_PLAY_INOVA_WAIT;
+      }
+      break;
+
+    case S_PLAY_INOVA_WAIT:
+      if (!pressed) {
+        if (conjure) { Serial.println(F("inova off")); }
+        else {         Serial.println(F("inova on")); }
+        inova = !inova;
+        inova_mode = 0;
+        button_state = S_PLAY_OFF;
+      } else if (since_press > 5000) {
         Serial.println(F("will conjure"));
         flash(0, 0, 128, 5); since_press += 500;
         button_state = S_PLAY_CONJURE_WAIT;
@@ -735,9 +786,10 @@ void handlePress(bool pressed) {
       if (!pressed) {
         if (conjure) { Serial.println(F("conjure off")); }
         else {         Serial.println(F("conjure on")); }
+        inova = false;
         conjure = !conjure;
         button_state = S_PLAY_OFF;
-      } else if (since_press > 5000) {
+      } else if (since_press > 7000) {
         Serial.println(F("will config"));
         flash(128, 128, 0, 5);
         button_state = S_PLAY_CONFIG_WAIT;
@@ -870,7 +922,7 @@ void handlePress(bool pressed) {
           // finish this palette, co back to palette select
           Serial.println(F("finished editing"));
           flash(128, 128, 128, 5);
-          mode->save(mode_addrs[cur_mode]);
+          mode->save(mode_addrs[bundles[cur_bundle][bundle_idx]]);
           mode->render_mode = 1;
           button_state = S_PSELECT_OFF;
         } else {
@@ -909,7 +961,7 @@ void handlePress(bool pressed) {
       if (!pressed) {
         Serial.println(F("exit to palette select and save"));
         mode->render_mode = 1;
-        mode->save(mode_addrs[cur_mode]);
+        mode->save(mode_addrs[bundles[cur_bundle][bundle_idx]]);
         button_state = S_PSELECT_OFF;
       }
       break;
