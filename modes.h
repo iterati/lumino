@@ -370,7 +370,7 @@ class GeoMorph : public Mode {
     uint8_t geo_r, geo_g, geo_b;
 };
 
-#define INOVA_TIMEOUT 2850
+#define INOVA_TIMEOUT 2600
 #define INOVA_OFF 0
 #define INOVA_ON 1
 #define INOVA_DOPS 2

@@ -1162,7 +1162,7 @@ int8_t iNova::handlePress(bool pressed) {
         }
 
         // dops
-        if (tick >= 11) tick = 0;
+        if (tick >= 10) tick = 0;
         if (tick < 1) {
           unpackColor(color, &color_r, &color_g, &color_b);
         } else {
@@ -1197,7 +1197,7 @@ int8_t iNova::handlePress(bool pressed) {
 
         // signal
         if (tick >= 300) tick = 0;
-        if (tick < 11) {
+        if (tick < 10) {
           unpackColor(color, &color_r, &color_g, &color_b);
         } else {
           color_r = 0; color_g = 0; color_b = 0;
