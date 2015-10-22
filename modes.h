@@ -97,14 +97,15 @@ class BlinkEPrime : public Prime {
 
 class MorphPrime : public Prime {
   public:
-    MorphPrime(uint16_t color_time, uint16_t blank_time) :
-      Prime(), color_time(color_time), blank_time(blank_time) {}
+    MorphPrime(uint16_t color_time, uint16_t blank_time, uint8_t strobes) :
+      Prime(), color_time(color_time), blank_time(blank_time), strobes(strobes) {}
 
     void render(uint8_t *r, uint8_t *g, uint8_t *b);
     void reset();
     void incTick();
 
     uint16_t color_time, blank_time;
+    uint8_t strobes, cur_strobe;
 };
 
 class FadePrime : public Prime {
