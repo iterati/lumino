@@ -9,7 +9,7 @@
 #include "elapsedMillis.h"
 #include "modes.h"
 
-//#define DEBUG
+#define DEBUG
 // ********************************************************************
 
 
