@@ -32,50 +32,50 @@ TiltMorph mode1 = TiltMorph(0.05);
 GeoMorph mode2 = GeoMorph(GM_XANDY, 5, 8, 0.05);
 
 // Mode3
-TriSpeed mode3 = TriSpeed(0.9);
-RainbowPrime prime30 = RainbowPrime(3, 23, 2, 512, 52);
-RainbowPrime prime31 = RainbowPrime(5,  8, 3, 256, 52);
-RainbowPrime prime32 = RainbowPrime(2, 11, 5, 128, 52);
+TriSpeed mode3 = TriSpeed(0.75);
+RainbowPrime prime30 = RainbowPrime(3, 23, 2, 256, 52);
+RainbowPrime prime31 = RainbowPrime(17, 17, 3, 256, 52);
+RainbowPrime prime32 = RainbowPrime(2, 11, 6, 256, 52);
 
 // Mode4
-DualMode mode4 = DualMode(A_SPEED, 0.5);
+DualMode mode4 = DualMode(A_SPEED, 0.25);
 BlinkEPrime prime40 = BlinkEPrime(5, 69);
 StrobePrime prime41 = StrobePrime(3, 23);
 
 // Mode5
-DualMode mode5 = DualMode(A_SPEED, 0.9);
+DualMode mode5 = DualMode(A_SPEED, 0.5);
 FadePrime prime50 = FadePrime(6, 20, 1);
 StrobePrime prime51 = StrobePrime(0, 100);
 
 // Mode6
-DualMode mode6 = DualMode(A_SPEED, 0.9);
+DualMode mode6 = DualMode(A_SPEED, 0.5);
 StrobePrime prime60 = StrobePrime(0, 100);
 LegoPrime prime61 = LegoPrime(8);
 
 // Mode7
-TriTilt mode7 = TriTilt(A_TILTY, 0.05);
+TriTilt mode7 = TriTilt(A_TILTY, 0.5);
 EmberPrime prime70 = EmberPrime(16, 16, 1);
 EmberPrime prime71 = EmberPrime(16, 16, 1);
 EmberPrime prime72 = EmberPrime(16, 16, 1);
 
 // Mode9
-TriTilt mode8 = TriTilt(A_TILTX, 0.05);
+TriTilt mode8 = TriTilt(A_TILTX, 0.5);
 TracerPrime prime80 = TracerPrime(3, 23);
 TracerPrime prime81 = TracerPrime(3, 23);
 TracerPrime prime82 = TracerPrime(3, 23);
 
 // Mode9
-DualMode mode9 = DualMode(A_FLIPZ, 0.05);
+DualMode mode9 = DualMode(A_FLIPZ, 0.5);
 FadePrime prime90 = FadePrime(100, 50, 2);
 FadePrime prime91 = FadePrime(100, 50, 2);
 
 // Mode10
-DualMode mode10 = DualMode(A_TILTY, 0.05);
+DualMode mode10 = DualMode(A_TILTY, 0.5);
 StrobePrime prime100 = StrobePrime(15, 21);
 TwoTimePrime prime101 = TwoTimePrime(15, 9, 3, 9);
 
 // Mode11
-DualMode mode11 = DualMode(A_TILTX, 0.05);
+DualMode mode11 = DualMode(A_TILTX, 0.5);
 ChasePrime prime110 = ChasePrime(50, 10, 5);
 MorphPrime prime111 = MorphPrime(50, 10, 4);
 
@@ -103,8 +103,6 @@ int8_t bundles[NUM_BUNDLES][NUM_MODES] = {
   { 3,  4,  5,  6, -1, -1, -1, -1, -1, -1, -1, -1}, // Only speed
   { 7,  8,  9, 10, 11, -1, -1, -1, -1, -1, -1, -1}, // Tilt primes
 };
-uint8_t cur_bundle = 0;
-uint8_t bundle_idx = 0;
 
 // SETUP MODES HERE
 void setupModes() {
@@ -366,6 +364,8 @@ uint8_t current_version = 255;
 #define PIN_LDO A3
 #define MMA7660_ADDRESS 0x4C
 
+uint8_t cur_bundle = 0;
+uint8_t bundle_idx = 0;
 Mode *mode = modes[bundles[cur_bundle][bundle_idx]];
 elapsedMicros limiter = 0;
 uint8_t accel_counter = 0;
@@ -451,6 +451,7 @@ void loop() {
     accUpdate();
     mode->updateAcc(fxg, fyg, fzg);
   }
+  accel_counter++;
 
   // Get the color to be rendered
   uint8_t r, g, b;
@@ -566,6 +567,19 @@ void writeFrame(uint8_t r, uint8_t g, uint8_t b) {
 }
 
 
+void accInit() {
+  Wire.begin();
+  accSend(0x07, 0x00);
+  accSend(0x06, 0x10);
+  accSend(0x08, 0x00);
+  accSend(0x07, 0x01);
+}
+
+void accStandby() {
+  Wire.begin();
+  accSend(0x07, 0x10);
+}
+
 void accSend(uint8_t reg_address, uint8_t data) {
   Wire.beginTransmission(MMA7660_ADDRESS);
   Wire.write(reg_address);
@@ -573,7 +587,7 @@ void accSend(uint8_t reg_address, uint8_t data) {
   Wire.endTransmission();
 }
 
-float translate_accel(int8_t g, float fg, float alpha) {
+float translateAccel(int8_t g, float fg, float alpha) {
   if (g >= 64) {
     // Out of bounds, don't alter fg
     return fg;
@@ -592,23 +606,10 @@ void accUpdate() {
   Wire.requestFrom(MMA7660_ADDRESS, 3);
 
   if (Wire.available()) {
-    fxg = translate_accel(Wire.read(), fxg, mode->alpha);
-    fyg = translate_accel(Wire.read(), fyg, mode->alpha);
-    fzg = translate_accel(Wire.read(), fzg, mode->alpha);
+    fxg = translateAccel(Wire.read(), fxg, mode->alpha);
+    fyg = translateAccel(Wire.read(), fyg, mode->alpha);
+    fzg = translateAccel(Wire.read(), fzg, mode->alpha);
   }
-}
-
-void accInit() {
-  Wire.begin();
-  accSend(0x07, 0x00);
-  accSend(0x06, 0x10);
-  accSend(0x08, 0x00);
-  accSend(0x07, 0x01);
-}
-
-void accStandby() {
-  Wire.begin();
-  accSend(0x07, 0x10);
 }
 
 

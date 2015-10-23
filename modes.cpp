@@ -360,12 +360,12 @@ void CandyStrobePrime::incTick() {
     tick = 0;
     cur_batch++;
     if (cur_batch >= batch) {
+      cur_batch = 0;
       repeat++;
       if (repeat >= repeats) {
-        cur_color = (cur_color + 1) % num_colors;
         repeat = 0;
+        cur_color = (cur_color + 1) % num_colors;
       }
-      cur_batch = 0;
     }
   }
 }
@@ -635,18 +635,18 @@ void DualMode::updateAcc(float fxg, float fyg, float fzg) {
       if (acc_counter < 0) acc_counter = 0;
       if (cur_variant == 0) {
         if (maxg > 1.5) {
-          acc_counter += 3;
+          acc_counter += 2;
         } else if (maxg > 1.35) {
           acc_counter++;
         } else {
           acc_counter--;
         }
-        if (acc_counter > 100) {
+        if (acc_counter > 15) {
           cur_variant = 1;
         }
       } else {
         if (maxg > 1.35) {
-          acc_counter += 3;
+          acc_counter += 2;
         } else if (maxg > 1.1) {
           acc_counter++;
         } else {
@@ -654,8 +654,8 @@ void DualMode::updateAcc(float fxg, float fyg, float fzg) {
         }
         if (acc_counter <= 0) {
           cur_variant = 0;
-        } else if (acc_counter > 125) {
-          acc_counter = 125;
+        } else if (acc_counter > 25) {
+          acc_counter = 25;
         }
       }
       break;
@@ -853,38 +853,35 @@ void TriSpeed::updateAcc(float fxg, float fyg, float fzg) {
 
   float pitch;
   uint8_t level;
-  maxg = max(max(abs(fxg), abs(fyg)), abs(fzg));
-  if (maxg >= 1.5) {
-    acc_counter += 8;
-  } else if (maxg >= 1.3) {
-    acc_counter += 5;
-  } else if (maxg >= 1.1) {
-    acc_counter += 2;
-  } else {
-    /* acc_counter--; */
-  }
 
   if (acc_counter < 0) acc_counter = 0;
+  maxg = max(max(abs(fxg), abs(fyg)), abs(fzg));
+  if (maxg >= 1.5) {
+    acc_counter += 2;
+  } else if (maxg >= 1.25) {
+    acc_counter += 1;
+  } else {
+    acc_counter--;
+  }
 
   if (cur_variant == 0) {
-    if (acc_counter > 250) {
+    if (acc_counter > 25) {
       cur_variant = 1;
     }
-    acc_counter -= 1;
   } else if (cur_variant == 1) {
+    if (maxg < 1.1) acc_counter--;
     if (acc_counter <= 0) {
       cur_variant = 0;
-    } else if (acc_counter > 2000) {
+    } else if (acc_counter > 75) {
       cur_variant = 2;
     }
-    acc_counter -= 3;
   } else {
-    if (acc_counter < 1500) {
+    acc_counter--;
+    if (acc_counter < 50) {
       cur_variant = 1;
-    } else if (acc_counter > 2250) {
-      acc_counter = 2250;
+    } else if (acc_counter > 100) {
+      acc_counter = 100;
     }
-    acc_counter -= 5;
   }
 }
 
